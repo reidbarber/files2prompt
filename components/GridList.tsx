@@ -49,13 +49,13 @@ export function GridListItem({
   let textValue = typeof children === "string" ? children : undefined;
   return (
     <AriaGridListItem textValue={textValue} {...props} className={itemStyles}>
-      {({ allowsDragging, isHovered, isFocusVisible }) => (
+      {({ allowsDragging }) => (
         <>
           {/* Add elements for drag and drop and selection. */}
           {allowsDragging && <Button slot="drag">≡</Button>}
           {children}
           {onRemove && (
-            <Button onPress={onRemove}>
+            <Button aria-label="Remove file" onPress={onRemove}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
