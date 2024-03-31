@@ -1,0 +1,10 @@
+.react-aria-DropIndicator {
+  &[data-drop-target] {
+    outline: 1px solid blue;
+  }
+
+  @supports not selector(:has(.foo)) {
+    /* Undo gap in browsers that don't support :has */
+    margin-bottom: -2px;
+  }
+}

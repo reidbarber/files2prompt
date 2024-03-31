@@ -14,6 +14,9 @@
     "react-aria": "^3.32.1",
     "react-aria-components": "^1.1.1",
     "react-dom": "^18",
+    "react-stately": "^3.30.1",
+    "sonner": "^1.4.41",
+    "tailwind-variants": "^0.2.1",
     "tailwindcss-react-aria-components": "^1.1.1"
   },
   "devDependencies": {

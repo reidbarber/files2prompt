@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormatOption } from "@/components/FormatOption";
+import { GridList, GridListItem } from "@/components/GridList";
+import { SettingsSwitch } from "@/components/SettingsSwitch";
+import { Key, useEffect, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
   DropZone,
@@ -9,72 +12,17 @@ import {
   FileDropItem,
   Button,
   RadioGroup,
-  Radio,
-  Switch,
   TextDropItem,
   DirectoryDropItem,
+  useDragAndDrop,
 } from "react-aria-components";
-
-async function filesToMarkdown(files: FileDropItem[]): Promise<string> {
-  let markdownString = "";
-
-  for (const file of files) {
-    const { name, type } = file;
-    const fileContent = await file.getText();
-
-    markdownString += `## ${name}\n\n`;
-    markdownString += `\`\`\`${getLanguageFromType(type)}\n`;
-    markdownString += `${fileContent}\n`;
-    markdownString += `\`\`\`\n\n`;
-  }
-
-  return markdownString;
-}
-
-async function filestoJSON(files: FileDropItem[]): Promise<string> {
-  let jsonString = "{\n";
-  files.forEach((file) => {
-    jsonString += `"${file.name}": "${file.getText()}",\n`;
-  });
-  jsonString += "}";
-  return jsonString;
-}
-
-async function filesToXML(files: FileDropItem[]): Promise<string> {
-  let xmlString = "<files>\n";
-  files.forEach((file) => {
-    xmlString += `  <file>\n    <name>${
-      file.name
-    }</name>\n    <content>${file.getText()}</content>\n  </file>\n`;
-  });
-  xmlString += "</files>";
-  return xmlString;
-}
-
-function getLanguageFromType(type: string): string {
-  switch (type) {
-    case "text/javascript":
-    case "application/javascript":
-      return "javascript";
-    case "text/typescript":
-    case "application/typescript":
-      return "typescript";
-    case "text/html":
-      return "html";
-    case "text/css":
-      return "css";
-    case "application/json":
-      return "json";
-    default:
-      return "";
-  }
-}
+import { toast } from "sonner";
 
 let options = [
   {
     key: "markdown",
     title: "Markdown",
-    description: "# file.py \n\n```\ncode\n```",
+    description: "## file.py \n\n```\ncode\n```",
   },
   { key: "json", title: "JSON", description: '{\n"file.py": "code"\n}' },
   {
@@ -84,62 +32,65 @@ let options = [
   },
 ];
 
-function FormatOption({ value, title, description }) {
-  return (
-    <Radio
-      value={value}
-      className={({ isFocusVisible, isSelected, isPressed }) => `
-      h-40 w-40 text-sm group relative flex flex-col cursor-default rounded-lg p-2 shadow-lg outline-none bg-clip-padding border border-solid
-      ${isFocusVisible ? "outline-2 outline-blue-600 outline-offset-1" : ""}
-      ${
-        isSelected
-          ? "bg-blue-600 border-white/30 text-white"
-          : "border-transparent"
-      }
-      ${isPressed && !isSelected ? "bg-blue-50" : ""}
-      ${!isSelected && !isPressed ? "bg-white" : ""}
-    `}
-    >
-      <div className="text-xl text-center font-semibold text-gray-900 group-selected:text-white">
-        {title}
-      </div>
-      <div className="text-xs whitespace-pre w-full not-sr-only">
-        <code>{description}</code>
-      </div>
-    </Radio>
-  );
-}
-
-function SettingsSwitch({ label, isSelected, onChange }) {
-  return (
-    <Switch
-      isSelected={isSelected}
-      onChange={onChange}
-      className="group flex gap-2 items-center text-black font-semibold text-lg"
-    >
-      {label}
-      <div className="flex h-[26px] w-[44px] shrink-0 cursor-default rounded-full shadow-inner bg-clip-padding border border-solid border-white/30 p-[3px] box-border transition duration-200 ease-in-out bg-slate-400 group-pressed:bg-slate-500 group-selected:bg-green-500 group-selected:group-pressed:bg-green-600 outline-none group-focus-visible:outline-blue-500 outline-2">
-        <span className="h-[18px] w-[18px] transform rounded-full bg-white shadow transition duration-200 ease-in-out translate-x-0 group-selected:translate-x-[100%]" />
-      </div>
-    </Switch>
-  );
-}
-
 interface TextFile {
+  key: Key;
   name: string;
   content: string;
 }
 
 export default function Home() {
   let [files, setFiles] = useState<TextFile[]>([]);
-  let [output, setOutput] = useState("");
   let [selectedOption, setSelectedOption] = useState("markdown");
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
 
   useEffect(() => {
-    console.log(files);
-  }, [files]);
+    const convertFilesToString = () => {
+      if (files.length === 0) return "";
+
+      switch (selectedOption) {
+        case "markdown":
+          return files
+            .map(
+              ({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``
+            )
+            .join("\n\n");
+        case "json":
+          return JSON.stringify(
+            files.map(({ name, content }) => ({ name, content })),
+            null,
+            2
+          );
+        case "xml":
+          return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
+            .map(
+              ({ name, content }) =>
+                `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
+            )
+            .join("\n")}\n</files>`;
+        default:
+          return "";
+      }
+    };
+
+    const copyToClipboard = async () => {
+      const fileString = convertFilesToString();
+      try {
+        await navigator.clipboard.writeText(fileString);
+        toast(
+          `Successfully copied prompt for <b>${files.length}</b> files in <b>${
+            options.find((option) => option.key === selectedOption)?.title
+          }</b>!`
+        );
+      } catch (err) {
+        console.error("Failed to copy files to clipboard:", err);
+      }
+    };
+
+    if (files.length > 0 && autoCopy) {
+      copyToClipboard();
+    }
+  }, [autoCopy, files, selectedOption]);
 
   const handleDrop = async (e: DropEvent) => {
     const newFiles: TextFile[] = [];
@@ -148,7 +99,7 @@ export default function Home() {
       if (entry.kind === "file") {
         const file = entry as FileDropItem;
         const content = await file.getText();
-        newFiles.push({ name: file.name, content });
+        newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
       } else if (entry.kind === "directory") {
         const directory = entry as DirectoryDropItem;
         for await (const nestedEntry of directory.getEntries()) {
@@ -161,7 +112,11 @@ export default function Home() {
       if (item.kind === "text") {
         const textItem = item as TextDropItem;
         const content = await textItem.getText("text/plain");
-        newFiles.push({ name: "untitled.txt", content });
+        newFiles.push({
+          key: crypto.randomUUID(),
+          name: "untitled.txt", // TODO: Can we auto-detect the format?
+          content,
+        });
       } else if (item.kind === "file" || item.kind === "directory") {
         await processEntry(item as FileDropItem | DirectoryDropItem);
       }
@@ -178,7 +133,7 @@ export default function Home() {
 
     const processFile = async (file: File) => {
       const content = await file.text();
-      newFiles.push({ name: file.name, content });
+      newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
     };
 
     const processDirectory = async (entry: FileSystemDirectoryEntry) => {
@@ -217,10 +172,49 @@ export default function Home() {
       }
     }
 
-    setFiles((prevFiles) =>
-      replaceOnDrop ? newFiles : [...prevFiles, ...newFiles]
-    );
+    // TODO: Should select obey replaceOnDrop?
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
+
+  let { dragAndDropHooks } = useDragAndDrop({
+    getItems: (keys) =>
+      files
+        .filter((file) => keys.has(file.key))
+        .map((file) => ({ "text/plain": file.name })),
+    onReorder(e) {
+      if (e.target.dropPosition === "before") {
+        setFiles((prevFiles) => {
+          const newFiles = [...prevFiles];
+          const targetIndex = newFiles.findIndex(
+            (file) => file.key === e.target.key
+          );
+          for (const key of e.keys) {
+            const item = newFiles.find((file) => file.key === key);
+            if (item !== undefined) {
+              newFiles.splice(newFiles.indexOf(item), 1);
+              newFiles.splice(targetIndex, 0, item);
+            }
+          }
+          return newFiles;
+        });
+      } else if (e.target.dropPosition === "after") {
+        setFiles((prevFiles) => {
+          const newFiles = [...prevFiles];
+          const targetIndex = newFiles.findIndex(
+            (file) => file.key === e.target.key
+          );
+          for (const key of e.keys) {
+            const item = newFiles.find((file) => file.key === key);
+            if (item !== undefined) {
+              newFiles.splice(newFiles.indexOf(item), 1);
+              newFiles.splice(targetIndex + 1, 0, item);
+            }
+          }
+          return newFiles;
+        });
+      }
+    },
+  });
 
   return (
     <main className="h-screen">
@@ -230,7 +224,7 @@ export default function Home() {
         onDrop={handleDrop}
       >
         {({ isDropTarget }) => (
-          <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-center">
+          <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-between h-full">
             <RadioGroup
               className="flex gap-2"
               aria-label="Options"
@@ -246,22 +240,69 @@ export default function Home() {
                 />
               ))}
             </RadioGroup>
-            <div className="flex items-center justify-center p-16">
-              <Text className="font-semibold text-xl inline mx-1" slot="label">
-                Drop files
-              </Text>
-              <span className="mx-1">or</span>
-              <FileTrigger allowsMultiple onSelect={handleSelect}>
-                <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
-                  Select
-                </Button>
-              </FileTrigger>
+            <div className="flex flex-col items-center justify-center p-20 gap-5">
+              {files.length > 0 ? (
+                <>
+                  <GridList
+                    className="overflow-scroll w-auto rounded-lg m-auto border-none"
+                    items={files}
+                    dragAndDropHooks={dragAndDropHooks}
+                    aria-label="Files"
+                  >
+                    {(item) => (
+                      <GridListItem
+                        onRemove={() =>
+                          setFiles((prevFiles) =>
+                            prevFiles.filter((file) => file.key !== item.key)
+                          )
+                        }
+                        className="border-none justify-center"
+                      >
+                        {item.name}
+                      </GridListItem>
+                    )}
+                  </GridList>
+                  <div className="flex justify-center">
+                    <Button
+                      onPress={() => setFiles([])}
+                      className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2"
+                    >
+                      Clear
+                    </Button>
+                    <FileTrigger allowsMultiple onSelect={handleSelect}>
+                      <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
+                        Add
+                      </Button>
+                    </FileTrigger>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center">
+                  <Text
+                    className="font-semibold text-xl inline mx-1"
+                    slot="label"
+                  >
+                    Drop files
+                  </Text>
+                  <span className="mx-1">or</span>
+                  <FileTrigger allowsMultiple onSelect={handleSelect}>
+                    <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
+                      Select
+                    </Button>
+                  </FileTrigger>
+                </div>
+              )}
             </div>
-            <div className="m-auto">
+            <div className="flex mx-auto flex-col items-end gap-2">
               <SettingsSwitch
                 label="Auto-copy"
                 isSelected={autoCopy}
                 onChange={setAutoCopy}
+              />
+              <SettingsSwitch
+                label="Replace on drop"
+                isSelected={replaceOnDrop}
+                onChange={setReplaceOnDrop}
               />
             </div>
           </div>
