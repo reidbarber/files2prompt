@@ -1,6 +1,6 @@
 "use client";
 
-import { FormatOption } from "@/components/FormatOption";
+import { AnimatedRadioGroup } from "@/components/AnimatedRadioGroup";
 import { GridList, GridListItem } from "@/components/GridList";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
 import { Key, useEffect, useState } from "react";
@@ -11,7 +11,6 @@ import {
   FileTrigger,
   FileDropItem,
   Button,
-  RadioGroup,
   TextDropItem,
   DirectoryDropItem,
   useDragAndDrop,
@@ -20,14 +19,14 @@ import { toast } from "sonner";
 
 let options = [
   {
-    key: "markdown",
-    title: "Markdown",
+    id: "markdown",
+    label: "Markdown",
     description: "## file.py \n\n```\ncode\n```",
   },
-  { key: "json", title: "JSON", description: '{\n"file.py": "code"\n}' },
+  { id: "json", label: "JSON", description: '{\n"file.py": "code"\n}' },
   {
-    key: "xml",
-    title: "XML",
+    id: "xml",
+    label: "XML",
     description: "<name>\n  file.py\n</name>\n<code>\n  code\n</code>",
   },
 ];
@@ -79,7 +78,7 @@ export default function Home() {
         await navigator.clipboard.writeText(fileString);
         toast(
           `Successfully copied prompt for <b>${files.length}</b> files in <b>${
-            options.find((option) => option.key === selectedOption)?.title
+            options.find((option) => option.id === selectedOption)?.label
           }</b>!`
         );
       } catch (err) {
@@ -225,21 +224,11 @@ export default function Home() {
       >
         {({ isDropTarget }) => (
           <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-between h-full">
-            <RadioGroup
-              className="flex gap-2"
-              aria-label="Options"
-              value={selectedOption}
-              onChange={(selectedOption) => setSelectedOption(selectedOption)}
-            >
-              {options.map((option) => (
-                <FormatOption
-                  key={option.key}
-                  value={option.key}
-                  title={option.title}
-                  description={option.description}
-                />
-              ))}
-            </RadioGroup>
+            <AnimatedRadioGroup
+              options={options}
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+            />
             <div className="flex flex-col items-center justify-center p-20 gap-5">
               {files.length > 0 ? (
                 <>
