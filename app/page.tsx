@@ -219,12 +219,21 @@ export default function Home() {
     <main className="h-screen">
       <DropZone
         aria-label="Drop files here or click to select files."
-        className="flex flex-col justify-center items-center gap-10 h-full"
+        className="flex flex-col justify-center items-center gap-10 h-full group"
         onDrop={handleDrop}
       >
         {({ isDropTarget }) => (
           <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-between h-full">
+            {isDropTarget &&
+              ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
+                <div className="absolute inset-0 z-10 rounded-lg h-screen flex items-center justify-center">
+                  <Text className="font-semibold text-5xl text-black drop-shadow-2xl">
+                    Drop to add
+                  </Text>
+                </div>
+              )}
             <AnimatedRadioGroup
+              className="group-drop-target:blur-xl transition duration-500 ease-in-out"
               options={options}
               selectedOption={selectedOption}
               setSelectedOption={setSelectedOption}
@@ -233,7 +242,7 @@ export default function Home() {
               {files.length > 0 ? (
                 <>
                   <GridList
-                    className="overflow-scroll w-auto rounded-lg m-auto border-none"
+                    className="group-drop-target:pointer-events-none group-drop-target:blur-xl transition duration-500 ease-in-out overflow-scroll w-auto rounded-lg m-auto border-none"
                     items={files}
                     dragAndDropHooks={dragAndDropHooks}
                     aria-label="Files"
@@ -251,7 +260,25 @@ export default function Home() {
                       </GridListItem>
                     )}
                   </GridList>
-                  <div className="flex justify-center">
+                  {isDropTarget && files.length > 0 && replaceOnDrop && (
+                    <div className="absolute inset-0 z-10 rounded-lg h-screen flex flex-col gap-3 items-center justify-center">
+                      <Text className="font-semibold text-xl text-black drop-shadow-xl">
+                        Drop to replace {files.length} files:
+                      </Text>
+                      <GridList
+                        className="w-auto rounded-lg mx-auto border-none"
+                        items={files}
+                        aria-label="Files to replace"
+                      >
+                        {(item) => (
+                          <GridListItem className="border-none justify-center">
+                            {item.name}
+                          </GridListItem>
+                        )}
+                      </GridList>
+                    </div>
+                  )}
+                  <div className="flex justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button
                       onPress={() => setFiles([])}
                       className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2"
@@ -268,21 +295,23 @@ export default function Home() {
               ) : (
                 <div className="flex items-center justify-center">
                   <Text
-                    className="font-semibold text-xl inline mx-1"
+                    className={`font-semibold text-xl inline mx-1 relative group-drop-target:blur-xl transition duration-500 ease-in-out`}
                     slot="label"
                   >
                     Drop files
                   </Text>
-                  <span className="mx-1">or</span>
-                  <FileTrigger allowsMultiple onSelect={handleSelect}>
-                    <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
-                      Select
-                    </Button>
-                  </FileTrigger>
+                  <span className="group-drop-target:blur-xl transition duration-500 ease-in-out">
+                    <span className="mx-1">or</span>
+                    <FileTrigger allowsMultiple onSelect={handleSelect}>
+                      <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
+                        Select
+                      </Button>
+                    </FileTrigger>
+                  </span>
                 </div>
               )}
             </div>
-            <div className="flex mx-auto flex-col items-end gap-2">
+            <div className="flex mx-auto flex-col items-end gap-2 group-drop-target:blur-xl transition duration-500 ease-in-out">
               <SettingsSwitch
                 label="Auto-copy"
                 isSelected={autoCopy}

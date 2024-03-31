@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Radio, RadioGroup } from "react-aria-components";
+import { composeTailwindRenderProps } from "./utils";
 
 interface Option {
   id: string;
@@ -11,16 +12,21 @@ interface AnimatedRadioGroupProps {
   options: Option[];
   selectedOption: string;
   setSelectedOption: (selectedOption: string) => void;
+  className?: string;
 }
 
 export function AnimatedRadioGroup({
   options,
   selectedOption,
   setSelectedOption,
+  className,
 }: AnimatedRadioGroupProps) {
   return (
     <RadioGroup
-      className="flex gap-2 mx-auto w-max"
+      className={composeTailwindRenderProps(
+        className,
+        "flex gap-2 mx-auto w-max"
+      )}
       aria-label="Options"
       value={selectedOption}
       onChange={setSelectedOption}
