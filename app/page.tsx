@@ -8,7 +8,7 @@ import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
 import { formatJSON, formatMarkdown, formatXML } from "@/utils/outputUtils";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
   DropZone,
@@ -94,7 +94,7 @@ export default function Home() {
   let [selectedXmlOption, setSelectedXmlOption] = useState(xmlOptions[0].id);
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
-  let cachedOuput = useMemo(() => {
+  let formattedOutput = useMemo(() => {
     const convertFilesToString = () => {
       if (files.length === 0) return "";
 
@@ -118,9 +118,9 @@ export default function Home() {
     selectedXmlOption,
   ]);
 
-  let copyToClipboard = async () => {
+  let copyOutoutToClipboard = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(cachedOuput);
+      await navigator.clipboard.writeText(formattedOutput);
       toast(
         `Successfully copied prompt for <b>${files.length}</b> files in <b>${
           options.find((option) => option.id === selectedOption)?.label
@@ -129,98 +129,11 @@ export default function Home() {
     } catch (err) {
       console.error("Failed to copy files to clipboard:", err);
     }
-  };
+  }, [formattedOutput, files.length, selectedOption]);
 
   useEffect(() => {
-    const convertFilesToString = () => {
-      if (files.length === 0) return "";
-
-      switch (selectedOption) {
-        case "markdown":
-          switch (selectedMarkdownOption) {
-            case "markdown1":
-              return files
-                .map(
-                  ({ name, content }) =>
-                    `## ${name}\n\n\`\`\n${content}\n\`\`\``
-                )
-                .join("\n\n");
-            case "markdown2":
-              return files
-                .map(({ name, content }) => `## ${name}\n\n${content}`)
-                .join("\n\n");
-            default:
-              return "";
-          }
-        case "json":
-          switch (selectedJsonOption) {
-            case "json1":
-              return JSON.stringify(
-                files.reduce((acc, { name, content }) => {
-                  acc[name] = content;
-                  return acc;
-                }, {}),
-                null,
-                2
-              );
-            case "json2":
-              return JSON.stringify(
-                files.map(({ name, content }) => ({ name, content })),
-                null,
-                2
-              );
-            default:
-              return "";
-          }
-        case "xml":
-          switch (selectedXmlOption) {
-            case "xml1":
-              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-                .map(
-                  ({ name, content }) =>
-                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-                )
-                .join("\n")}\n</files>`;
-            case "xml2":
-              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-                .map(
-                  ({ name, content }) =>
-                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-                )
-                .join("\n")}\n</files>`;
-            default:
-              return "";
-          }
-        default:
-          return "";
-      }
-    };
-
-    const copyToClipboard = async () => {
-      const fileString = convertFilesToString();
-      try {
-        await navigator.clipboard.writeText(fileString);
-        toast(
-          `Successfully copied prompt for <b>${files.length}</b> files in <b>${
-            options.find((option) => option.id === selectedOption)?.label
-          }</b>!`
-        );
-      } catch (err) {
-        console.error("Failed to copy files to clipboard:", err);
-      }
-    };
-
-    if (files.length > 0 && autoCopy) {
-      copyToClipboard();
-    }
-  }, [
-    autoCopy,
-    files,
-    selectedJsonOption,
-    selectedMarkdownOption,
-    selectedOption,
-    selectedXmlOption,
-  ]);
+    copyOutoutToClipboard();
+  }, [copyOutoutToClipboard, formattedOutput]);
 
   const handleDrop = async (e: DropEvent) => {
     const newFiles: TextFile[] = [];
@@ -485,12 +398,14 @@ export default function Home() {
                   )}
                   <div className="flex gap-2 justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button onPress={() => setFiles([])}>Clear</Button>
-                    <Button onPress={copyToClipboard}>Copy</Button>
+                    <Button onPress={copyOutoutToClipboard}>Copy</Button>
                     <DialogTrigger>
                       <Button>Preview</Button>
                       <Modal>
                         <Dialog title="Output">
-                          <pre className="overflow-scroll">{cachedOuput}</pre>
+                          <pre className="overflow-scroll">
+                            {formattedOutput}
+                          </pre>
                         </Dialog>
                       </Modal>
                     </DialogTrigger>
