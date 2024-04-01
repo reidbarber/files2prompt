@@ -13,6 +13,7 @@ interface AnimatedRadioGroupProps {
   selectedOption: string;
   setSelectedOption: (selectedOption: string) => void;
   className?: string;
+  label?: string;
 }
 
 export function AnimatedRadioGroup({
@@ -20,6 +21,7 @@ export function AnimatedRadioGroup({
   selectedOption,
   setSelectedOption,
   className,
+  label,
 }: AnimatedRadioGroupProps) {
   return (
     <RadioGroup
@@ -27,7 +29,7 @@ export function AnimatedRadioGroup({
         className,
         "flex gap-2 mx-auto w-max"
       )}
-      aria-label="Options"
+      aria-label={label || "Options"}
       value={selectedOption}
       onChange={setSelectedOption}
     >

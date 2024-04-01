@@ -321,6 +321,7 @@ export default function Home() {
                               Markdown
                             </Text>
                             <DetailedAnimatedRadioGroup
+                              label="Markdown options"
                               className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
                               options={markdownOptions}
                               selectedOption={selectedMarkdownOption}
@@ -330,6 +331,7 @@ export default function Home() {
                           <div>
                             <Text className="font-semibold text-lg">JSON</Text>
                             <DetailedAnimatedRadioGroup
+                              label="JSON options"
                               className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
                               options={jsonOptions}
                               selectedOption={selectedJsonOption}
@@ -339,6 +341,7 @@ export default function Home() {
                           <div>
                             <Text className="font-semibold text-lg">XML</Text>
                             <DetailedAnimatedRadioGroup
+                              label="XML options"
                               className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
                               options={xmlOptions}
                               selectedOption={selectedXmlOption}
@@ -352,6 +355,7 @@ export default function Home() {
                 </DialogTrigger>
               </div>
               <AnimatedRadioGroup
+                label="Output format"
                 className="group-drop-target:blur-xl transition duration-500 ease-in-out mt-3"
                 options={options}
                 selectedOption={selectedOption}
