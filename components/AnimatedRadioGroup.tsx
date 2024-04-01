@@ -37,7 +37,7 @@ export function AnimatedRadioGroup({
           value={option.id}
           className={`${
             selectedOption === option.id ? "" : "hover:text-slate-900"
-          } relative rounded-full px-3 py-1.5 w-24 text-center text-sm font-medium text-slate-800 outline-sky-400 transition focus-visible:outline-2`}
+          } relative rounded-full px-3 py-1.5 w-24 text-center text-sm font-medium text-slate-800 ring-slate-800 transition focus-visible:ring-2 ring-offset-2`}
           style={{
             WebkitTapHighlightColor: "transparent",
           }}
