@@ -3,7 +3,7 @@
 import { AnimatedRadioGroup } from "@/components/AnimatedRadioGroup";
 import { GridList, GridListItem } from "@/components/GridList";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
-import { Key, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
   DropZone,
@@ -14,6 +14,7 @@ import {
   TextDropItem,
   DirectoryDropItem,
   useDragAndDrop,
+  Key,
 } from "react-aria-components";
 import { toast } from "sonner";
 
