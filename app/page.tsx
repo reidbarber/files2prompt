@@ -224,6 +224,9 @@ export default function Home() {
       >
         {({ isDropTarget }) => (
           <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-between h-full">
+            <h1 className="absolute top-5 left-0 right-0 w-full text-center text-xl font-mono">
+              files2prompt
+            </h1>
             {isDropTarget &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
                 <div className="absolute inset-0 z-10 rounded-lg h-screen flex items-center justify-center">
@@ -233,7 +236,7 @@ export default function Home() {
                 </div>
               )}
             <AnimatedRadioGroup
-              className="group-drop-target:blur-xl transition duration-500 ease-in-out"
+              className="group-drop-target:blur-xl transition duration-500 ease-in-out mt-7"
               options={options}
               selectedOption={selectedOption}
               setSelectedOption={setSelectedOption}
