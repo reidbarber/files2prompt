@@ -7,6 +7,7 @@ import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
+import { formatJSON, formatMarkdown, formatXML } from "@/utils/outputUtils";
 import { useEffect, useMemo, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
@@ -77,7 +78,7 @@ const xmlOptions = [
   },
 ];
 
-interface TextFile {
+export interface TextFile {
   key: Key;
   name: string;
   content: string;
@@ -99,60 +100,11 @@ export default function Home() {
 
       switch (selectedOption) {
         case "markdown":
-          switch (selectedMarkdownOption) {
-            case "markdown1":
-              return files
-                .map(
-                  ({ name, content }) =>
-                    `## ${name}\n\n\`\`\n${content}\n\`\`\``
-                )
-                .join("\n\n");
-            case "markdown2":
-              return files
-                .map(({ name, content }) => `## ${name}\n\n${content}`)
-                .join("\n\n");
-            default:
-              return "";
-          }
+          return formatMarkdown(files, selectedMarkdownOption);
         case "json":
-          switch (selectedJsonOption) {
-            case "json1":
-              return JSON.stringify(
-                files.reduce((acc, { name, content }) => {
-                  acc[name] = content;
-                  return acc;
-                }, {}),
-                null,
-                2
-              );
-            case "json2":
-              return JSON.stringify(
-                files.map(({ name, content }) => ({ name, content })),
-                null,
-                2
-              );
-            default:
-              return "";
-          }
+          return formatJSON(files, selectedJsonOption);
         case "xml":
-          switch (selectedXmlOption) {
-            case "xml1":
-              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-                .map(
-                  ({ name, content }) =>
-                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-                )
-                .join("\n")}\n</files>`;
-            case "xml2":
-              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-                .map(
-                  ({ name, content }) =>
-                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-                )
-                .join("\n")}\n</files>`;
-            default:
-              return "";
-          }
+          return formatXML(files, selectedXmlOption);
         default:
           return "";
       }
