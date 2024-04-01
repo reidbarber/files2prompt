@@ -51,7 +51,6 @@ export function GridListItem({
     <AriaGridListItem textValue={textValue} {...props} className={itemStyles}>
       {({ allowsDragging }) => (
         <>
-          {/* Add elements for drag and drop and selection. */}
           {allowsDragging && <Button slot="drag">≡</Button>}
           {children}
           {onRemove && (

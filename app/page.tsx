@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatedRadioGroup } from "@/components/AnimatedRadioGroup";
+import { Button } from "@/components/Button";
 import { GridList, GridListItem } from "@/components/GridList";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
 import { useEffect, useState } from "react";
@@ -10,7 +11,6 @@ import {
   Text,
   FileTrigger,
   FileDropItem,
-  Button,
   TextDropItem,
   DirectoryDropItem,
   useDragAndDrop,
@@ -228,7 +228,7 @@ export default function Home() {
             {isDropTarget &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
                 <div className="absolute inset-0 z-10 rounded-lg h-screen flex items-center justify-center">
-                  <Text className="font-semibold text-5xl text-black drop-shadow-2xl">
+                  <Text className="font-semibold text-5xl text-black dark:text-white drop-shadow-2xl">
                     Drop to add
                   </Text>
                 </div>
@@ -284,17 +284,10 @@ export default function Home() {
                       </GridList>
                     </div>
                   )}
-                  <div className="flex justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
-                    <Button
-                      onPress={() => setFiles([])}
-                      className="bg-slate-700 mx-1 text-white dark:ring-offset-black px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2"
-                    >
-                      Clear
-                    </Button>
+                  <div className="flex gap-2 justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
+                    <Button onPress={() => setFiles([])}>Clear</Button>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
-                      <Button className="bg-slate-700 mx-1 text-white dark:ring-offset-black px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
-                        Add
-                      </Button>
+                      <Button>Add</Button>
                     </FileTrigger>
                   </div>
                 </>
@@ -309,9 +302,7 @@ export default function Home() {
                   <div className="group-drop-target:blur-xl transition duration-500 ease-in-out text-center">
                     <div className="mb-1">or</div>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
-                      <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none dark:ring-offset-black focus-visible:ring-2 ring-blue-500 ring-offset-2">
-                        Select
-                      </Button>
+                      <Button>Select</Button>
                     </FileTrigger>
                   </div>
                 </div>
