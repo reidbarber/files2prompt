@@ -285,12 +285,12 @@ export default function Home() {
                   <div className="flex justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button
                       onPress={() => setFiles([])}
-                      className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2"
+                      className="bg-slate-700 mx-1 text-white dark:ring-offset-black px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2"
                     >
                       Clear
                     </Button>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
-                      <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
+                      <Button className="bg-slate-700 mx-1 text-white dark:ring-offset-black px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-sm transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
                         Add
                       </Button>
                     </FileTrigger>
@@ -307,7 +307,7 @@ export default function Home() {
                   <span className="group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <span className="mx-1">or</span>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
-                      <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none focus-visible:ring-2 ring-blue-500 ring-offset-2">
+                      <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none dark:ring-offset-black focus-visible:ring-2 ring-blue-500 ring-offset-2">
                         Select
                       </Button>
                     </FileTrigger>

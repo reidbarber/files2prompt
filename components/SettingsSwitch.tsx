@@ -15,7 +15,7 @@ export function SettingsSwitch({
     <Switch
       isSelected={isSelected}
       onChange={onChange}
-      className="group flex gap-2 items-center text-black font-semibold text-lg"
+      className="group flex gap-2 items-center text-black dark:text-white font-semibold text-lg"
     >
       {label}
       <div className="flex h-[26px] w-[44px] shrink-0 cursor-default rounded-full shadow-inner bg-clip-padding border border-solid border-white/30 p-[3px] box-border transition duration-200 ease-in-out bg-slate-400 group-pressed:bg-slate-500 group-selected:bg-green-500 group-selected:group-pressed:bg-green-600 outline-none group-focus-visible:outline-blue-500 outline-2">
