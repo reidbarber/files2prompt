@@ -225,9 +225,6 @@ export default function Home() {
       >
         {({ isDropTarget }) => (
           <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-between h-full">
-            <h1 className="absolute top-5 left-0 right-0 w-full text-center text-xl font-mono">
-              files2prompt
-            </h1>
             {isDropTarget &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
                 <div className="absolute inset-0 z-10 rounded-lg h-screen flex items-center justify-center">
@@ -236,12 +233,17 @@ export default function Home() {
                   </Text>
                 </div>
               )}
-            <AnimatedRadioGroup
-              className="group-drop-target:blur-xl transition duration-500 ease-in-out mt-7"
-              options={options}
-              selectedOption={selectedOption}
-              setSelectedOption={setSelectedOption}
-            />
+            <div>
+              <h1 className="w-full text-center text-xl font-mono">
+                files2prompt
+              </h1>
+              <AnimatedRadioGroup
+                className="group-drop-target:blur-xl transition duration-500 ease-in-out mt-3"
+                options={options}
+                selectedOption={selectedOption}
+                setSelectedOption={setSelectedOption}
+              />
+            </div>
             <div className="flex flex-col items-center justify-center p-20 gap-5">
               {files.length > 0 ? (
                 <>
@@ -297,21 +299,21 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center">
                   <Text
                     className={`font-semibold text-xl inline mx-1 relative group-drop-target:blur-xl transition duration-500 ease-in-out`}
                     slot="label"
                   >
                     Drop files
                   </Text>
-                  <span className="group-drop-target:blur-xl transition duration-500 ease-in-out">
-                    <span className="mx-1">or</span>
+                  <div className="group-drop-target:blur-xl transition duration-500 ease-in-out text-center">
+                    <div className="mb-1">or</div>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
                       <Button className="bg-slate-700 mx-1 text-white px-2 py-1 inline-flex justify-center rounded-md border border-solid border-transparent font-semibold font-[inherit] text-xl transition-colors cursor-default outline-none dark:ring-offset-black focus-visible:ring-2 ring-blue-500 ring-offset-2">
                         Select
                       </Button>
                     </FileTrigger>
-                  </span>
+                  </div>
                 </div>
               )}
             </div>
