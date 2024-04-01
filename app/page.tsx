@@ -6,7 +6,7 @@ import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
   DropZone,
@@ -47,6 +47,49 @@ export default function Home() {
   let [selectedOption, setSelectedOption] = useState("markdown");
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
+  let cachedOuput = useMemo(() => {
+    const convertFilesToString = () => {
+      if (files.length === 0) return "";
+
+      switch (selectedOption) {
+        case "markdown":
+          return files
+            .map(
+              ({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``
+            )
+            .join("\n\n");
+        case "json":
+          return JSON.stringify(
+            files.map(({ name, content }) => ({ name, content })),
+            null,
+            2
+          );
+        case "xml":
+          return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
+            .map(
+              ({ name, content }) =>
+                `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
+            )
+            .join("\n")}\n</files>`;
+        default:
+          return "";
+      }
+    };
+    return convertFilesToString();
+  }, [files, selectedOption]);
+
+  let copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(cachedOuput);
+      toast(
+        `Successfully copied prompt for <b>${files.length}</b> files in <b>${
+          options.find((option) => option.id === selectedOption)?.label
+        }</b>!`
+      );
+    } catch (err) {
+      console.error("Failed to copy files to clipboard:", err);
+    }
+  };
 
   useEffect(() => {
     const convertFilesToString = () => {
@@ -326,6 +369,7 @@ export default function Home() {
                   )}
                   <div className="flex gap-2 justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button onPress={() => setFiles([])}>Clear</Button>
+                    <Button onPress={copyToClipboard}>Copy</Button>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
                       <Button>Add</Button>
                     </FileTrigger>
