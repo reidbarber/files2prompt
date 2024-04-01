@@ -2,11 +2,13 @@
 
 import { AnimatedRadioGroup } from "@/components/AnimatedRadioGroup";
 import { Button } from "@/components/Button";
+import { DetailedAnimatedRadioGroup } from "@/components/DetailedAnimatedRadioGroup";
 import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
-import { useEffect, useMemo, useState } from "react";
+import { formatJSON, formatMarkdown, formatXML } from "@/utils/outputUtils";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
   DropZone,
@@ -22,7 +24,7 @@ import {
 } from "react-aria-components";
 import { toast } from "sonner";
 
-let options = [
+const options = [
   {
     id: "markdown",
     label: "Markdown",
@@ -36,7 +38,47 @@ let options = [
   },
 ];
 
-interface TextFile {
+const markdownOptions = [
+  {
+    id: "markdown1",
+    label: "Option 1",
+    description: "## name \n\n```\ncontent\n```",
+  },
+  {
+    id: "markdown2",
+    label: "Option 2",
+    description: "## name \n\ncontent",
+  },
+];
+
+const jsonOptions = [
+  {
+    id: "json1",
+    label: "Option 1",
+    description: "{\n  name: content\n}",
+  },
+  {
+    id: "json2",
+    label: "Option 2",
+    description: '[\n {\n  "name": name\n  "content": content  \n  }\n]',
+  },
+];
+
+const xmlOptions = [
+  {
+    id: "xml1",
+    label: "Option 1",
+    description: "<name>name</name>\n<content>content</content>",
+  },
+  {
+    id: "xml2",
+    label: "Option 2",
+    description:
+      "<file>\n  <name>name</name>\n  <content>content</content>\n</file>",
+  },
+];
+
+export interface TextFile {
   key: Key;
   name: string;
   content: string;
@@ -44,43 +86,41 @@ interface TextFile {
 
 export default function Home() {
   let [files, setFiles] = useState<TextFile[]>([]);
-  let [selectedOption, setSelectedOption] = useState("markdown");
+  let [selectedOption, setSelectedOption] = useState(options[0].id);
+  let [selectedMarkdownOption, setSelectedMarkdownOption] = useState(
+    markdownOptions[0].id
+  );
+  let [selectedJsonOption, setSelectedJsonOption] = useState(jsonOptions[0].id);
+  let [selectedXmlOption, setSelectedXmlOption] = useState(xmlOptions[0].id);
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
-  let cachedOuput = useMemo(() => {
+  let formattedOutput = useMemo(() => {
     const convertFilesToString = () => {
       if (files.length === 0) return "";
 
       switch (selectedOption) {
         case "markdown":
-          return files
-            .map(
-              ({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``
-            )
-            .join("\n\n");
+          return formatMarkdown(files, selectedMarkdownOption);
         case "json":
-          return JSON.stringify(
-            files.map(({ name, content }) => ({ name, content })),
-            null,
-            2
-          );
+          return formatJSON(files, selectedJsonOption);
         case "xml":
-          return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-            .map(
-              ({ name, content }) =>
-                `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-            )
-            .join("\n")}\n</files>`;
+          return formatXML(files, selectedXmlOption);
         default:
           return "";
       }
     };
     return convertFilesToString();
-  }, [files, selectedOption]);
+  }, [
+    files,
+    selectedJsonOption,
+    selectedMarkdownOption,
+    selectedOption,
+    selectedXmlOption,
+  ]);
 
-  let copyToClipboard = async () => {
+  let copyOutoutToClipboard = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(cachedOuput);
+      await navigator.clipboard.writeText(formattedOutput);
       toast(
         `Successfully copied prompt for <b>${files.length}</b> files in <b>${
           options.find((option) => option.id === selectedOption)?.label
@@ -89,55 +129,13 @@ export default function Home() {
     } catch (err) {
       console.error("Failed to copy files to clipboard:", err);
     }
-  };
+  }, [formattedOutput, files.length, selectedOption]);
 
   useEffect(() => {
-    const convertFilesToString = () => {
-      if (files.length === 0) return "";
-
-      switch (selectedOption) {
-        case "markdown":
-          return files
-            .map(
-              ({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``
-            )
-            .join("\n\n");
-        case "json":
-          return JSON.stringify(
-            files.map(({ name, content }) => ({ name, content })),
-            null,
-            2
-          );
-        case "xml":
-          return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-            .map(
-              ({ name, content }) =>
-                `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-            )
-            .join("\n")}\n</files>`;
-        default:
-          return "";
-      }
-    };
-
-    const copyToClipboard = async () => {
-      const fileString = convertFilesToString();
-      try {
-        await navigator.clipboard.writeText(fileString);
-        toast(
-          `Successfully copied prompt for <b>${files.length}</b> files in <b>${
-            options.find((option) => option.id === selectedOption)?.label
-          }</b>!`
-        );
-      } catch (err) {
-        console.error("Failed to copy files to clipboard:", err);
-      }
-    };
-
-    if (files.length > 0 && autoCopy) {
-      copyToClipboard();
+    if (autoCopy) {
+      copyOutoutToClipboard();
     }
-  }, [autoCopy, files, selectedOption]);
+  }, [autoCopy, copyOutoutToClipboard, formattedOutput]);
 
   const handleDrop = async (e: DropEvent) => {
     const newFiles: TextFile[] = [];
@@ -304,23 +302,60 @@ export default function Home() {
                   </RACButton>
                   <Modal>
                     <Dialog title="Settings">
-                      <div className="flex mx-auto flex-col items-end gap-2 group-drop-target:blur-xl transition duration-500 ease-in-out">
-                        <SettingsSwitch
-                          label="Auto-copy"
-                          isSelected={autoCopy}
-                          onChange={setAutoCopy}
-                        />
-                        <SettingsSwitch
-                          label="Replace on drop"
-                          isSelected={replaceOnDrop}
-                          onChange={setReplaceOnDrop}
-                        />
+                      <div className="group-drop-target:blur-xl transition duration-500 ease-in-out">
+                        <div className="flex w-52 text-end mx-auto flex-col items-end gap-2 my-8">
+                          <SettingsSwitch
+                            label="Auto-copy"
+                            isSelected={autoCopy}
+                            onChange={setAutoCopy}
+                          />
+                          <SettingsSwitch
+                            label="Replace on drop"
+                            isSelected={replaceOnDrop}
+                            onChange={setReplaceOnDrop}
+                          />
+                        </div>
+                        <div className="text-center flex flex-col gap-4">
+                          <div>
+                            <Text className="font-semibold text-lg">
+                              Markdown
+                            </Text>
+                            <DetailedAnimatedRadioGroup
+                              label="Markdown options"
+                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
+                              options={markdownOptions}
+                              selectedOption={selectedMarkdownOption}
+                              setSelectedOption={setSelectedMarkdownOption}
+                            />
+                          </div>
+                          <div>
+                            <Text className="font-semibold text-lg">JSON</Text>
+                            <DetailedAnimatedRadioGroup
+                              label="JSON options"
+                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
+                              options={jsonOptions}
+                              selectedOption={selectedJsonOption}
+                              setSelectedOption={setSelectedJsonOption}
+                            />
+                          </div>
+                          <div>
+                            <Text className="font-semibold text-lg">XML</Text>
+                            <DetailedAnimatedRadioGroup
+                              label="XML options"
+                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
+                              options={xmlOptions}
+                              selectedOption={selectedXmlOption}
+                              setSelectedOption={setSelectedXmlOption}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </Dialog>
                   </Modal>
                 </DialogTrigger>
               </div>
               <AnimatedRadioGroup
+                label="Output format"
                 className="group-drop-target:blur-xl transition duration-500 ease-in-out mt-3"
                 options={options}
                 selectedOption={selectedOption}
@@ -369,7 +404,17 @@ export default function Home() {
                   )}
                   <div className="flex gap-2 justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button onPress={() => setFiles([])}>Clear</Button>
-                    <Button onPress={copyToClipboard}>Copy</Button>
+                    <Button onPress={copyOutoutToClipboard}>Copy</Button>
+                    <DialogTrigger>
+                      <Button>Preview</Button>
+                      <Modal>
+                        <Dialog title="Output">
+                          <pre className="overflow-scroll">
+                            {formattedOutput}
+                          </pre>
+                        </Dialog>
+                      </Modal>
+                    </DialogTrigger>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
                       <Button>Add</Button>
                     </FileTrigger>
