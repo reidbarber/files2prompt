@@ -2,6 +2,7 @@
 
 import { AnimatedRadioGroup } from "@/components/AnimatedRadioGroup";
 import { Button } from "@/components/Button";
+import { DetailedAnimatedRadioGroup } from "@/components/DetailedAnimatedRadioGroup";
 import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
@@ -22,7 +23,7 @@ import {
 } from "react-aria-components";
 import { toast } from "sonner";
 
-let options = [
+const options = [
   {
     id: "markdown",
     label: "Markdown",
@@ -36,6 +37,46 @@ let options = [
   },
 ];
 
+const markdownOptions = [
+  {
+    id: "markdown1",
+    label: "Option 1",
+    description: "## name \n\n```\ncontent\n```",
+  },
+  {
+    id: "markdown2",
+    label: "Option 2",
+    description: "## name \n\ncontent",
+  },
+];
+
+const jsonOptions = [
+  {
+    id: "json1",
+    label: "Option 1",
+    description: "{\n  name: content\n}",
+  },
+  {
+    id: "json2",
+    label: "Option 2",
+    description: '[\n {\n  "name": name\n  "content": content  \n  }\n]',
+  },
+];
+
+const xmlOptions = [
+  {
+    id: "xml1",
+    label: "Option 1",
+    description: "<name>name</name>\n<content>content</content>",
+  },
+  {
+    id: "xml2",
+    label: "Option 2",
+    description:
+      "<file>\n  <name>name</name>\n  <content>content</content>\n</file>",
+  },
+];
+
 interface TextFile {
   key: Key;
   name: string;
@@ -44,7 +85,12 @@ interface TextFile {
 
 export default function Home() {
   let [files, setFiles] = useState<TextFile[]>([]);
-  let [selectedOption, setSelectedOption] = useState("markdown");
+  let [selectedOption, setSelectedOption] = useState(options[0].id);
+  let [selectedMarkdownOption, setSelectedMarkdownOption] = useState(
+    markdownOptions[0].id
+  );
+  let [selectedJsonOption, setSelectedJsonOption] = useState(jsonOptions[0].id);
+  let [selectedXmlOption, setSelectedXmlOption] = useState(xmlOptions[0].id);
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
   let cachedOuput = useMemo(() => {
@@ -53,30 +99,72 @@ export default function Home() {
 
       switch (selectedOption) {
         case "markdown":
-          return files
-            .map(
-              ({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``
-            )
-            .join("\n\n");
+          switch (selectedMarkdownOption) {
+            case "markdown1":
+              return files
+                .map(
+                  ({ name, content }) =>
+                    `## ${name}\n\n\`\`\n${content}\n\`\`\``
+                )
+                .join("\n\n");
+            case "markdown2":
+              return files
+                .map(({ name, content }) => `## ${name}\n\n${content}`)
+                .join("\n\n");
+            default:
+              return "";
+          }
         case "json":
-          return JSON.stringify(
-            files.map(({ name, content }) => ({ name, content })),
-            null,
-            2
-          );
+          switch (selectedJsonOption) {
+            case "json1":
+              return JSON.stringify(
+                files.reduce((acc, { name, content }) => {
+                  acc[name] = content;
+                  return acc;
+                }, {}),
+                null,
+                2
+              );
+            case "json2":
+              return JSON.stringify(
+                files.map(({ name, content }) => ({ name, content })),
+                null,
+                2
+              );
+            default:
+              return "";
+          }
         case "xml":
-          return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-            .map(
-              ({ name, content }) =>
-                `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-            )
-            .join("\n")}\n</files>`;
+          switch (selectedXmlOption) {
+            case "xml1":
+              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
+                .map(
+                  ({ name, content }) =>
+                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
+                )
+                .join("\n")}\n</files>`;
+            case "xml2":
+              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
+                .map(
+                  ({ name, content }) =>
+                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
+                )
+                .join("\n")}\n</files>`;
+            default:
+              return "";
+          }
         default:
           return "";
       }
     };
     return convertFilesToString();
-  }, [files, selectedOption]);
+  }, [
+    files,
+    selectedJsonOption,
+    selectedMarkdownOption,
+    selectedOption,
+    selectedXmlOption,
+  ]);
 
   let copyToClipboard = async () => {
     try {
@@ -97,24 +185,60 @@ export default function Home() {
 
       switch (selectedOption) {
         case "markdown":
-          return files
-            .map(
-              ({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``
-            )
-            .join("\n\n");
+          switch (selectedMarkdownOption) {
+            case "markdown1":
+              return files
+                .map(
+                  ({ name, content }) =>
+                    `## ${name}\n\n\`\`\n${content}\n\`\`\``
+                )
+                .join("\n\n");
+            case "markdown2":
+              return files
+                .map(({ name, content }) => `## ${name}\n\n${content}`)
+                .join("\n\n");
+            default:
+              return "";
+          }
         case "json":
-          return JSON.stringify(
-            files.map(({ name, content }) => ({ name, content })),
-            null,
-            2
-          );
+          switch (selectedJsonOption) {
+            case "json1":
+              return JSON.stringify(
+                files.reduce((acc, { name, content }) => {
+                  acc[name] = content;
+                  return acc;
+                }, {}),
+                null,
+                2
+              );
+            case "json2":
+              return JSON.stringify(
+                files.map(({ name, content }) => ({ name, content })),
+                null,
+                2
+              );
+            default:
+              return "";
+          }
         case "xml":
-          return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
-            .map(
-              ({ name, content }) =>
-                `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
-            )
-            .join("\n")}\n</files>`;
+          switch (selectedXmlOption) {
+            case "xml1":
+              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
+                .map(
+                  ({ name, content }) =>
+                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
+                )
+                .join("\n")}\n</files>`;
+            case "xml2":
+              return `<?xml version="1.0" encoding="UTF-8"?>\n<files>\n${files
+                .map(
+                  ({ name, content }) =>
+                    `  <file>\n    <name>${name}</name>\n    <content>${content}</content>\n  </file>`
+                )
+                .join("\n")}\n</files>`;
+            default:
+              return "";
+          }
         default:
           return "";
       }
@@ -137,7 +261,14 @@ export default function Home() {
     if (files.length > 0 && autoCopy) {
       copyToClipboard();
     }
-  }, [autoCopy, files, selectedOption]);
+  }, [
+    autoCopy,
+    files,
+    selectedJsonOption,
+    selectedMarkdownOption,
+    selectedOption,
+    selectedXmlOption,
+  ]);
 
   const handleDrop = async (e: DropEvent) => {
     const newFiles: TextFile[] = [];
@@ -304,17 +435,50 @@ export default function Home() {
                   </RACButton>
                   <Modal>
                     <Dialog title="Settings">
-                      <div className="flex mx-auto flex-col items-end gap-2 group-drop-target:blur-xl transition duration-500 ease-in-out">
-                        <SettingsSwitch
-                          label="Auto-copy"
-                          isSelected={autoCopy}
-                          onChange={setAutoCopy}
-                        />
-                        <SettingsSwitch
-                          label="Replace on drop"
-                          isSelected={replaceOnDrop}
-                          onChange={setReplaceOnDrop}
-                        />
+                      <div className="group-drop-target:blur-xl transition duration-500 ease-in-out">
+                        <div className="flex w-52 text-end mx-auto flex-col items-end gap-2 my-8">
+                          <SettingsSwitch
+                            label="Auto-copy"
+                            isSelected={autoCopy}
+                            onChange={setAutoCopy}
+                          />
+                          <SettingsSwitch
+                            label="Replace on drop"
+                            isSelected={replaceOnDrop}
+                            onChange={setReplaceOnDrop}
+                          />
+                        </div>
+                        <div className="text-center flex flex-col gap-4">
+                          <div>
+                            <Text className="font-semibold text-lg">
+                              Markdown
+                            </Text>
+                            <DetailedAnimatedRadioGroup
+                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
+                              options={markdownOptions}
+                              selectedOption={selectedMarkdownOption}
+                              setSelectedOption={setSelectedMarkdownOption}
+                            />
+                          </div>
+                          <div>
+                            <Text className="font-semibold text-lg">JSON</Text>
+                            <DetailedAnimatedRadioGroup
+                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
+                              options={jsonOptions}
+                              selectedOption={selectedJsonOption}
+                              setSelectedOption={setSelectedJsonOption}
+                            />
+                          </div>
+                          <div>
+                            <Text className="font-semibold text-lg">XML</Text>
+                            <DetailedAnimatedRadioGroup
+                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
+                              options={xmlOptions}
+                              selectedOption={selectedXmlOption}
+                              setSelectedOption={setSelectedXmlOption}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </Dialog>
                   </Modal>
@@ -370,6 +534,14 @@ export default function Home() {
                   <div className="flex gap-2 justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button onPress={() => setFiles([])}>Clear</Button>
                     <Button onPress={copyToClipboard}>Copy</Button>
+                    <DialogTrigger>
+                      <Button>Preview</Button>
+                      <Modal>
+                        <Dialog title="Output">
+                          <pre className="overflow-scroll">{cachedOuput}</pre>
+                        </Dialog>
+                      </Modal>
+                    </DialogTrigger>
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
                       <Button>Add</Button>
                     </FileTrigger>
