@@ -44,7 +44,9 @@ export function DetailedAnimatedRadioGroup({
           } relative px-3 py-1.5 text-center text-sm font-medium text-slate-800 dark:text-white ring-slate-800 dark:ring-white dark:ring-offset-black transition focus-visible:ring-2 ring-offset-2 rounded-md`}
           style={{ WebkitTapHighlightColor: "transparent" }}
         >
-          <div className="text-lg font-semibold mb-2">{option.label}</div>
+          <div className="text-lg font-semibold mb-2 whitespace-pre leading-tight">
+            {option.label}
+          </div>
           <pre className="text-start">{option.description}</pre>
         </Radio>
       ))}
