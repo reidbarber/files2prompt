@@ -300,7 +300,7 @@ export default function Home() {
                       />
                     </svg>
                   </RACButton>
-                  <Modal>
+                  <Modal isDismissable>
                     <Dialog title="Settings">
                       <div className="group-drop-target:blur-xl transition duration-500 ease-in-out">
                         <div className="flex w-52 text-end mx-auto flex-col items-end gap-2 my-8">

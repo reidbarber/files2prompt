@@ -4,9 +4,9 @@ import {
   DialogProps,
   Heading,
   Dialog as RACDialog,
+  Button as RACButton,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import { Button } from "./Button";
 
 function DialogWrapper(props: DialogProps) {
   return (
@@ -45,7 +45,11 @@ export function Dialog({
             >
               {title}
             </Heading>
-            <Button onPress={close} className="rounded-full p-2 bg-transparent">
+            <RACButton
+              aria-label="Close settings"
+              onPress={close}
+              className="rounded-full p-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-2 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -54,7 +58,7 @@ export function Dialog({
               >
                 <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
               </svg>
-            </Button>
+            </RACButton>
           </div>
           <p className="mt-3 text-slate-500 dark:text-zinc-400">{children}</p>
         </>
