@@ -132,10 +132,10 @@ export default function Home() {
   }, [formattedOutput, files.length, selectedOption]);
 
   useEffect(() => {
-    if (autoCopy) {
+    if (autoCopy && files.length > 0) {
       copyOutoutToClipboard();
     }
-  }, [autoCopy, copyOutoutToClipboard, formattedOutput]);
+  }, [autoCopy, copyOutoutToClipboard, files.length, formattedOutput]);
 
   const handleDrop = async (e: DropEvent) => {
     const newFiles: TextFile[] = [];
