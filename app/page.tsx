@@ -431,7 +431,9 @@ export default function Home() {
                   <div>or</div>
                   <div className="text-center">
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
-                      <Button>Select</Button>
+                      <RACButton className="mt-1 rounded-md border border-slate-600 dark:border-slate-100 dark:hover:border-slate-300 px-2 py-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2  ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out">
+                        Select
+                      </RACButton>
                     </FileTrigger>
                   </div>
                 </div>

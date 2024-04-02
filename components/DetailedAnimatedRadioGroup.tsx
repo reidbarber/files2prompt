@@ -1,6 +1,5 @@
 import { Radio, RadioGroup } from "react-aria-components";
 import { composeTailwindRenderProps } from "./utils";
-import { motion } from "framer-motion";
 
 interface Option {
   id: string;
