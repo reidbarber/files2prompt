@@ -8,8 +8,9 @@ import Head from "next/head";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "files2prompt",
-  description: "Convert files to prompt code snippets",
+  title: "files2prompt - Convert files to LLM prompts",
+  description:
+    "Convert files (like source code) to formatted LLM prompts (like markdown). Copy the generated prompt to your clipboard automatically.",
 };
 
 export default function RootLayout({
