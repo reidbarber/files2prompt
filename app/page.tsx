@@ -315,7 +315,7 @@ export default function Home() {
                             onChange={setReplaceOnDrop}
                           />
                         </div>
-                        <div className="text-center flex flex-col gap-4">
+                        <div className="text-center flex flex-col gap-10">
                           <div>
                             <Text className="font-semibold text-lg">
                               Markdown

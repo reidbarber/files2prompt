@@ -1,5 +1,6 @@
 import { Radio, RadioGroup } from "react-aria-components";
 import { composeTailwindRenderProps } from "./utils";
+import { motion } from "framer-motion";
 
 interface Option {
   id: string;
@@ -26,7 +27,7 @@ export function DetailedAnimatedRadioGroup({
     <RadioGroup
       className={composeTailwindRenderProps(
         className,
-        "flex gap-2 mx-auto w-max"
+        "flex flex-col w-full sm:flex-row sm:w-max gap-2 mx-auto"
       )}
       aria-label={label || "Options"}
       value={selectedOption}
@@ -38,7 +39,7 @@ export function DetailedAnimatedRadioGroup({
           value={option.id}
           className={`${
             selectedOption === option.id
-              ? "bg-white text-slate-900 dark:text-black"
+              ? "bg-white text-slate-900 selected:dark:text-slate-900"
               : "hover:text-slate-900 dark:hover:text-slate-100"
           } relative px-3 py-1.5 text-center text-sm font-medium text-slate-800 dark:text-white ring-slate-800 dark:ring-white dark:ring-offset-black transition focus-visible:ring-2 ring-offset-2 rounded-md`}
           style={{ WebkitTapHighlightColor: "transparent" }}
