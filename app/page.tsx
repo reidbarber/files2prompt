@@ -283,7 +283,7 @@ export default function Home() {
                 <h1 className="text-center text-xl font-mono">files2prompt</h1>
                 <DialogTrigger>
                   <RACButton
-                    className="rounded-full p-1 cursor-default outline-none focus-visible:ring-2 ring-offset-2 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
+                    className="rounded-full p-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-2 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
                     aria-label="Settings"
                   >
                     <svg

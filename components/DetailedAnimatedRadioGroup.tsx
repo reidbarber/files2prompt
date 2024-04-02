@@ -39,9 +39,9 @@ export function DetailedAnimatedRadioGroup({
           value={option.id}
           className={`${
             selectedOption === option.id
-              ? "bg-white text-slate-900 selected:dark:text-slate-900"
+              ? "dark:bg-white text-white dark:text-slate-900 dark:selected:text-slate-900 bg-slate-800"
               : "hover:text-slate-900 dark:hover:text-slate-100"
-          } relative px-3 py-1.5 text-center text-sm font-medium text-slate-800 dark:text-white ring-slate-800 dark:ring-white dark:ring-offset-black transition focus-visible:ring-2 ring-offset-2 rounded-md`}
+          } relative px-3 min-w-32 py-1.5 text-center text-sm font-medium text-slate-800 dark:text-white ring-slate-800 dark:ring-white dark:ring-offset-black transition focus-visible:ring-2 ring-offset-2 rounded-md`}
           style={{ WebkitTapHighlightColor: "transparent" }}
         >
           <div className="text-lg font-semibold mb-2 whitespace-pre leading-tight">
