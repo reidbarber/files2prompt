@@ -262,23 +262,23 @@ export default function Home() {
   });
 
   return (
-    <main className="h-screen">
+    <main className="h-dvh">
       <DropZone
         aria-label="Drop files here or click to select files."
         className="flex flex-col justify-center items-center gap-10 h-full group"
         onDrop={handleDrop}
       >
         {({ isDropTarget }) => (
-          <div className="p-2 sm:p-8 rounded-lg flex flex-col justify-between h-full">
+          <div className="p-4 sm:p-8 rounded-lg flex flex-col justify-between h-full">
             {isDropTarget &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
-                <div className="absolute inset-0 z-10 rounded-lg h-screen flex items-center justify-center">
+                <div className="absolute inset-0 z-10 rounded-lg h-dvh flex items-center justify-center">
                   <Text className="font-semibold text-5xl text-black dark:text-white drop-shadow-2xl">
                     Drop to add
                   </Text>
                 </div>
               )}
-            <div>
+            <div className="flex flex-col gap-5">
               <div className="flex justify-center gap-3 m-auto">
                 <h1 className="text-center text-xl font-mono">files2prompt</h1>
                 <DialogTrigger>
@@ -356,7 +356,7 @@ export default function Home() {
               </div>
               <AnimatedRadioGroup
                 label="Output format"
-                className="group-drop-target:blur-xl transition duration-500 ease-in-out mt-3"
+                className="group-drop-target:blur-xl transition duration-500 ease-in-out"
                 options={options}
                 selectedOption={selectedOption}
                 setSelectedOption={setSelectedOption}
@@ -385,7 +385,7 @@ export default function Home() {
                     )}
                   </GridList>
                   {isDropTarget && files.length > 0 && replaceOnDrop && (
-                    <div className="absolute inset-0 z-10 rounded-lg h-screen flex flex-col gap-3 items-center justify-center">
+                    <div className="absolute inset-0 z-10 rounded-lg h-dvh flex flex-col gap-3 items-center justify-center">
                       <Text className="font-semibold text-xl text-black drop-shadow-xl">
                         Drop to replace {files.length} files:
                       </Text>
@@ -421,15 +421,15 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center gap-2 group-drop-target:blur-xl transition duration-500 ease-in-out">
                   <Text
-                    className={`font-semibold text-xl inline mx-1 relative group-drop-target:blur-xl transition duration-500 ease-in-out`}
+                    className={`font-semibold text-xl inline mx-1 relative`}
                     slot="label"
                   >
                     Drop files
                   </Text>
-                  <div className="group-drop-target:blur-xl transition duration-500 ease-in-out text-center">
-                    <div className="mb-1">or</div>
+                  <div>or</div>
+                  <div className="text-center">
                     <FileTrigger allowsMultiple onSelect={handleSelect}>
                       <Button>Select</Button>
                     </FileTrigger>
@@ -438,8 +438,8 @@ export default function Home() {
               )}
             </div>
             <div className="max-w-80 mx-auto text-sm text-center font-light font-mono group-drop-target:blur-xl transition duration-500 ease-in-out">
-              Convert file contents to text prompts for ChatGPT, Claude, etc. in
-              the browser.
+              Convert files to text prompts for ChatGPT, Claude, etc.{" "}
+              <u>in the browser</u>.
             </div>
           </div>
         )}
