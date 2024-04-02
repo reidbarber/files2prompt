@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +19,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <meta property="og:title" content="file2prompt" />
+        <meta
+          property="og:description"
+          content="Convert code or text files to prompts"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://files2prompt.com" />
+        <meta property="og:image" content="/og-image.png" />
+      </Head>
       <body className={inter.className}>{children}</body>
       <Toaster
         toastOptions={{
