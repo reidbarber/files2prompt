@@ -363,6 +363,17 @@ export default function Home() {
                             />
                           </div>
                         </div>
+                        <p className="text-center pt-8">
+                          Made by{" "}
+                          <a
+                            className="underline"
+                            href="https://www.reidbarber.com"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Reid Barber
+                          </a>
+                        </p>
                       </div>
                     </Dialog>
                   </Modal>
