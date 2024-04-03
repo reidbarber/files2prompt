@@ -51,10 +51,21 @@ export function GridListItem({
     <AriaGridListItem textValue={textValue} {...props} className={itemStyles}>
       {({ allowsDragging }) => (
         <>
-          {allowsDragging && <Button slot="drag">≡</Button>}
+          {allowsDragging && (
+            <Button
+              slot="drag"
+              className="rounded-full cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-1 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
+            >
+              ≡
+            </Button>
+          )}
           {children}
           {onRemove && (
-            <Button aria-label="Remove file" onPress={onRemove}>
+            <Button
+              aria-label="Remove file"
+              onPress={onRemove}
+              className="rounded-full p-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-1 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
