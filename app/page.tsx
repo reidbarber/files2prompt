@@ -8,7 +8,7 @@ import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
 import { formatJSON, formatMarkdown, formatXML } from "@/utils/outputUtils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
   DropZone,
@@ -226,7 +226,15 @@ export default function Home() {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
+  let isListDragging = useRef(false);
+
   let { dragAndDropHooks } = useDragAndDrop({
+    onDragStart: () => {
+      isListDragging.current = true;
+    },
+    onDragEnd: () => {
+      isListDragging.current = false;
+    },
     getItems: (keys) =>
       files
         .filter((file) => keys.has(file.key))
@@ -276,6 +284,7 @@ export default function Home() {
         {({ isDropTarget }) => (
           <div className="p-4 sm:p-8 rounded-lg flex flex-col justify-between h-full">
             {isDropTarget &&
+              !isListDragging.current &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
                 <div className="absolute inset-0 z-10 rounded-lg h-dvh flex items-center justify-center">
                   <Text className="font-semibold text-5xl text-black dark:text-white drop-shadow-2xl">
@@ -378,6 +387,7 @@ export default function Home() {
                   >
                     {(item) => (
                       <GridListItem
+                        textValue={item.name}
                         onRemove={() =>
                           setFiles((prevFiles) =>
                             prevFiles.filter((file) => file.key !== item.key)
@@ -419,24 +429,27 @@ export default function Home() {
                       </GridListItem>
                     )}
                   </GridList>
-                  {isDropTarget && files.length > 0 && replaceOnDrop && (
-                    <div className="absolute inset-0 z-10 rounded-lg h-dvh flex flex-col gap-3 items-center justify-center">
-                      <Text className="font-semibold text-xl text-black drop-shadow-xl">
-                        Drop to replace {files.length} files:
-                      </Text>
-                      <GridList
-                        className="w-auto rounded-lg mx-auto border-none"
-                        items={files}
-                        aria-label="Files to replace"
-                      >
-                        {(item) => (
-                          <GridListItem className="border-none justify-center">
-                            {item.name}
-                          </GridListItem>
-                        )}
-                      </GridList>
-                    </div>
-                  )}
+                  {isDropTarget &&
+                    !isListDragging.current &&
+                    files.length > 0 &&
+                    replaceOnDrop && (
+                      <div className="absolute inset-0 z-10 rounded-lg h-dvh flex flex-col gap-3 items-center justify-center">
+                        <Text className="font-semibold text-xl text-black drop-shadow-xl">
+                          Drop to replace {files.length} files:
+                        </Text>
+                        <GridList
+                          className="w-auto rounded-lg mx-auto border-none"
+                          items={files}
+                          aria-label="Files to replace"
+                        >
+                          {(item) => (
+                            <GridListItem className="border-none justify-center">
+                              {item.name}
+                            </GridListItem>
+                          )}
+                        </GridList>
+                      </div>
+                    )}
                   <div className="flex gap-2 justify-center group-drop-target:blur-xl transition duration-500 ease-in-out">
                     <Button onPress={() => setFiles([])}>Clear</Button>
                     <Button onPress={copyOutoutToClipboard}>Copy</Button>
