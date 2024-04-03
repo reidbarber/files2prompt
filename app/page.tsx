@@ -41,7 +41,7 @@ const options = [
 const markdownOptions = [
   {
     id: "markdown1",
-    label: "Headings +\n Code blocks",
+    label: "Headings + Code Blocks",
     description: "## name \n\n```\ncontent\n```",
   },
   {
@@ -59,7 +59,7 @@ const jsonOptions = [
   },
   {
     id: "json2",
-    label: "Array of objects",
+    label: "Array of Objects",
     description: '[\n {\n  "name": name\n  "content": content  \n  }\n]',
   },
 ];
