@@ -366,7 +366,7 @@ export default function Home() {
                         </div>
                         <div className="p-10">
                           <div className="text-center">Coming soon: </div>
-                          <ul className="list-disc px-32 pt-5">
+                          <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
                             <li>
                               Support for: PDFs, images, Word documents, Excel
                               spreadsheets
