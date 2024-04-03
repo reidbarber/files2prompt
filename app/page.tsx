@@ -7,6 +7,7 @@ import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
+import SignUpFormReact from "@/components/SignupForm";
 import { formatJSON, formatMarkdown, formatXML } from "@/utils/outputUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropEvent } from "react-aria";
@@ -374,6 +375,7 @@ export default function Home() {
                             <li>More...</li>
                           </ul>
                         </div>
+                        <SignUpFormReact />
                         <p className="text-center pt-8">
                           Made by{" "}
                           <a
