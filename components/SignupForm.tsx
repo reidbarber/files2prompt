@@ -6,6 +6,7 @@
 ////////////////
 
 import { useState } from "react";
+import { Button, Input, TextField } from "react-aria-components";
 
 const INIT = "INIT";
 const SUBMITTING = "SUBMITTING";
@@ -20,7 +21,7 @@ const formStyles = {
   formFont: "Inter",
   formFontColor: "#000000",
   formFontSizePx: 14,
-  buttonText: "Get Updates",
+  buttonText: "Stay Updated",
   buttonFont: "Inter",
   buttonFontColor: "#ffffff",
   buttonColor: "#0D9488",
@@ -157,37 +158,16 @@ export default function SignUpFormReact() {
         <>
           <form
             onSubmit={handleSubmit}
-            style={{
-              display: "flex",
-              flexDirection: isInline ? "row" : "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-            }}
+            className="flex flex-col sm:flex-row items-center justify-center w-full items gap-2 h-10"
           >
-            <input
-              type="text"
-              name="email"
-              placeholder={formStyles.placeholderText}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required={true}
-              style={{
-                color: formStyles.formFontColor,
-                fontFamily: `'${formStyles.formFont}', sans-serif`,
-                fontSize: `${formStyles.formFontSizePx}px`,
-                margin: isInline ? "0px 10px 0px 0px" : "0px 0px 10px",
-                width: "100%",
-                maxWidth: "300px",
-                minWidth: "100px",
-                background: "#FFFFFF",
-                border: "1px solid #D1D5DB",
-                boxSizing: "border-box",
-                boxShadow: "rgba(0, 0, 0, 0.05) 0px 1px 2px",
-                borderRadius: "6px",
-                padding: "8px 12px",
-              }}
-            />
+            <TextField value={email} onChange={setEmail}>
+              <Input
+                type="text"
+                name="email"
+                placeholder={formStyles.placeholderText}
+                className="h-10 rounded-md bg-transparent border border-slate-600 dark:border-slate-100 dark:hover:border-slate-300 px-2 py-1 dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2  ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
+              />
+            </TextField>
             <SignUpFormButton />
           </form>
         </>
@@ -242,33 +222,12 @@ export default function SignUpFormReact() {
 
   function SignUpFormButton({ props }: any) {
     return (
-      <button
+      <Button
         type="submit"
-        style={{
-          background: formStyles.buttonColor,
-          fontSize: `${formStyles.buttonFontSizePx}px`,
-          color: formStyles.buttonFontColor,
-          fontFamily: `'${formStyles.buttonFont}', sans-serif`,
-          width: isInline ? "min-content" : "100%",
-          maxWidth: "300px",
-          whiteSpace: isInline ? "nowrap" : "normal",
-          height: "38px",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "row",
-          padding: "9px 17px",
-          boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
-          borderRadius: "6px",
-          textAlign: "center",
-          fontStyle: "normal",
-          fontWeight: 500,
-          lineHeight: "20px",
-          border: "none",
-          cursor: "pointer",
-        }}
+        className="h-10 rounded-md border border-slate-600 dark:border-slate-100 dark:hover:border-slate-300 px-2 py-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2  ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
       >
         {formState === SUBMITTING ? "Please wait..." : formStyles.buttonText}
-      </button>
+      </Button>
     );
   }
 }
