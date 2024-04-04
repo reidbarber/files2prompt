@@ -160,7 +160,11 @@ export default function SignUpFormReact() {
             onSubmit={handleSubmit}
             className="flex flex-col sm:flex-row items-center justify-center w-full items gap-2 h-10"
           >
-            <TextField value={email} onChange={setEmail}>
+            <TextField
+              aria-label="Email address"
+              value={email}
+              onChange={setEmail}
+            >
               <Input
                 type="text"
                 name="email"
