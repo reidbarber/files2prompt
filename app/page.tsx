@@ -400,7 +400,7 @@ export default function Home() {
                 setSelectedOption={setSelectedOption}
               />
             </div>
-            <div className="flex flex-col items-center justify-center p-20 gap-5">
+            <div className="flex flex-col items-center justify-center p-20 gap-5 max-h-full overflow-auto">
               {files.length > 0 ? (
                 <>
                   <GridList
