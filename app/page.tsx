@@ -369,9 +369,11 @@ export default function Home() {
                           <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
                             <li>
                               Support for: PDFs, images, Word documents, Excel
-                              spreadsheets
+                              spreadsheets, zip files, etc.
                             </li>
                             <li>Custom output formats</li>
+                            <li>Preambles</li>
+                            <li>Text editing</li>
                             <li>More...</li>
                           </ul>
                         </div>
