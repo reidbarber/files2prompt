@@ -116,6 +116,7 @@ export default function Home() {
   let [selectedXmlOption, setSelectedXmlOption] = useState(xmlOptions[0].id);
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
+  let [ignoreDsStore, setIgnoreDsStore] = useState(true);
   let formattedOutput = useMemo(() => {
     const convertFilesToString = () => {
       if (files.length === 0) return "";
@@ -165,6 +166,9 @@ export default function Home() {
     const processEntry = async (entry: FileDropItem | DirectoryDropItem) => {
       if (entry.kind === "file") {
         const file = entry as FileDropItem;
+        if (ignoreDsStore && file.name === ".DS_Store") {
+          return;
+        }
         const fileContent = await file.getFile();
         let newFile = { key: crypto.randomUUID(), name: file.name };
         if (isImage(file)) {
@@ -264,6 +268,9 @@ export default function Home() {
     const files = Array.from(fileList);
 
     for (const file of files) {
+      if (ignoreDsStore && file.name === ".DS_Store") {
+        continue;
+      }
       if (file.webkitRelativePath) {
         // Handle directory
         const entry = await new Promise<FileSystemDirectoryEntry>((resolve) => {
@@ -384,6 +391,11 @@ export default function Home() {
                             label="Replace on drop"
                             isSelected={replaceOnDrop}
                             onChange={setReplaceOnDrop}
+                          />
+                          <SettingsSwitch
+                            label="Ignore .DS_Store"
+                            isSelected={ignoreDsStore}
+                            onChange={setIgnoreDsStore}
                           />
                         </div>
                         <div className="text-center flex flex-col gap-10">
