@@ -24,6 +24,14 @@ import {
   DialogTrigger,
 } from "react-aria-components";
 import { toast } from "sonner";
+import { pdfjs } from "react-pdf";
+import { getTextFromPDF } from "@/utils/getTextFromPDF";
+import { getTextFromImage } from "@/utils/getTextFromImage";
+import { getTextFromExcelFile } from "@/utils/getTextFromExcelFile";
+import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
+
+pdfjs.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const options = [
   {
@@ -83,6 +91,14 @@ const xmlOptions = [
 //   "text/*",
 //   "application/json,.py,.ts,.js,.html,.css,.xml,.md,.yaml,.",
 // ];
+
+let isImage = (file: FileDropItem) => file.type.startsWith("image/");
+let isPDF = (file: FileDropItem) => file.type === "application/pdf";
+let isExcel = (file: FileDropItem) =>
+  file.type === "application/vnd.ms-excel" ||
+  file.type ===
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+let isZip = (file: FileDropItem) => file.type === "application/zip";
 
 export interface TextFile {
   key: Key;
@@ -149,8 +165,48 @@ export default function Home() {
     const processEntry = async (entry: FileDropItem | DirectoryDropItem) => {
       if (entry.kind === "file") {
         const file = entry as FileDropItem;
-        const content = await file.getText();
-        newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
+        const fileContent = await file.getFile();
+        let newFile = { key: crypto.randomUUID(), name: file.name };
+        if (isImage(file)) {
+          newFiles.push({
+            ...newFile,
+            content: await getTextFromImage(fileContent),
+          });
+        } else if (isPDF(file)) {
+          newFiles.push({
+            ...newFile,
+            content: await getTextFromPDF(fileContent),
+          });
+        } else if (isExcel(file)) {
+          newFiles.push({
+            ...newFile,
+            content: await getTextFromExcelFile(fileContent),
+          });
+        } else if (isZip(file)) {
+          const zipReader = new ZipReader(new BlobReader(fileContent));
+
+          for (const entry of await zipReader.getEntries()) {
+            if (entry.directory) continue;
+
+            const fileContent = await entry.getData?.(new BlobWriter());
+            if (fileContent) {
+              const fileText = await new Response(fileContent).text();
+              newFiles.push({
+                key: crypto.randomUUID(),
+                name: entry.filename,
+                content: fileText,
+              });
+            }
+          }
+
+          await zipReader.close();
+        } else {
+          newFiles.push({
+            key: crypto.randomUUID(),
+            name: file.name,
+            content: await file.getText(),
+          });
+        }
       } else if (entry.kind === "directory") {
         const directory = entry as DirectoryDropItem;
         for await (const nestedEntry of directory.getEntries()) {
