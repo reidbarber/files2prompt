@@ -424,9 +424,10 @@ export default function Home() {
                           <div className="text-center">Coming soon: </div>
                           <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
                             <li>
-                              Support for: PDFs, images, Word documents, Excel
-                              spreadsheets, zip files, etc.
+                              Word document (.docx) and PowerPoint (.pptx)
+                              support
                             </li>
+                            <li>Parse images in PDFs</li>
                             <li>Custom output formats</li>
                             <li>Preambles</li>
                             <li>Text editing</li>
@@ -581,7 +582,7 @@ export default function Home() {
               )}
             </div>
             <div className="max-w-80 mx-auto text-sm text-center font-light font-mono group-drop-target:blur-xl transition duration-500 ease-in-out">
-              Convert files to text prompts for ChatGPT, Claude, etc.{" "}
+              Convert files to text prompts for ChatGPT, Claude, Gemini, etc.{" "}
               <u>in the browser</u>.
             </div>
           </div>
