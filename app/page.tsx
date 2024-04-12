@@ -516,7 +516,7 @@ export default function Home() {
                               />
                             </svg>
                           </RACButton>
-                          <Modal>
+                          <Modal isDismissable>
                             <Dialog title={item.name}>
                               <pre className="overflow-scroll">
                                 {item.content}
@@ -553,7 +553,7 @@ export default function Home() {
                     <Button onPress={copyOutoutToClipboard}>Copy</Button>
                     <DialogTrigger>
                       <Button>Preview</Button>
-                      <Modal>
+                      <Modal isDismissable>
                         <Dialog title="Output">
                           <pre className="overflow-scroll">
                             {formattedOutput}
