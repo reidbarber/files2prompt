@@ -381,14 +381,9 @@ export default function Home() {
                   <Modal isDismissable>
                     <Dialog title="Settings">
                       <div className="group-drop-target:blur-xl transition duration-500 ease-in-out">
-                        <div className="flex w-52 text-end mx-auto flex-col items-end gap-2 my-8">
+                        <div className="flex w-60 text-end mx-auto flex-col items-end gap-2 my-8">
                           <SettingsSwitch
-                            label="Auto-copy"
-                            isSelected={autoCopy}
-                            onChange={setAutoCopy}
-                          />
-                          <SettingsSwitch
-                            label="Replace on drop"
+                            label="Replace files on drop"
                             isSelected={replaceOnDrop}
                             onChange={setReplaceOnDrop}
                           />
@@ -594,6 +589,13 @@ export default function Home() {
               )}
             </div>
             <div className="max-w-80 mx-auto text-sm text-center font-light font-mono group-drop-target:blur-xl transition duration-500 ease-in-out">
+              <div className="flex justify-center m-4">
+                <SettingsSwitch
+                  label="Auto-copy"
+                  isSelected={autoCopy}
+                  onChange={setAutoCopy}
+                />
+              </div>
               Convert files to text prompts for ChatGPT, Claude, Gemini, etc.{" "}
               <u>in the browser</u>.
             </div>
