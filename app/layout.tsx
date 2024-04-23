@@ -8,7 +8,7 @@ import Head from "next/head";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "files2prompt - Convert files to LLM prompts",
+  title: "Files2Prompt - Convert files to LLM prompts",
   description:
     "Convert files (like source code) to formatted LLM prompts (like markdown). Copy the generated prompt to your clipboard automatically.",
 };
@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <meta property="og:title" content="file2prompt" />
+        <meta property="og:title" content="Files2Prompt" />
         <meta
           property="og:description"
           content="Convert code or text files to prompts"
