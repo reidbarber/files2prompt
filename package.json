@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@internationalized/number": "^3.5.1",
     "@vercel/analytics": "^1.2.2",
     "@zip.js/zip.js": "^2.7.41",
     "framer-motion": "^11.0.24",
+    "js-tiktoken": "^1.0.11",
     "next": "14.1.4",
     "react": "^18",
     "react-aria": "^3.32.1",

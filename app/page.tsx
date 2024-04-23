@@ -29,6 +29,8 @@ import { getTextFromPDF } from "@/utils/getTextFromPDF";
 import { getTextFromImage } from "@/utils/getTextFromImage";
 import { getTextFromExcelFile } from "@/utils/getTextFromExcelFile";
 import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
+import { getEncoding } from "js-tiktoken";
+import { NumberFormatter } from "@internationalized/number";
 
 pdfjs.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -100,6 +102,8 @@ let isExcel = (file: FileDropItem) =>
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 let isZip = (file: FileDropItem) => file.type === "application/zip";
 
+let formatter = new NumberFormatter("en-US");
+
 export interface TextFile {
   key: Key;
   name: string;
@@ -140,6 +144,11 @@ export default function Home() {
     selectedOption,
     selectedXmlOption,
   ]);
+  const encoding = getEncoding("cl100k_base");
+  const tokenCount = useMemo(
+    () => encoding.encode(formattedOutput).length,
+    [encoding, formattedOutput]
+  );
 
   let copyOutoutToClipboard = useCallback(async () => {
     try {
@@ -512,7 +521,11 @@ export default function Home() {
                             </svg>
                           </RACButton>
                           <Modal isDismissable>
-                            <Dialog title={item.name}>
+                            <Dialog
+                              title={`${item.name} (${formatter.format(
+                                encoding.encode(item.content).length
+                              )} tokens)`}
+                            >
                               <pre className="overflow-scroll">
                                 {item.content}
                               </pre>
@@ -549,7 +562,11 @@ export default function Home() {
                     <DialogTrigger>
                       <Button>Preview</Button>
                       <Modal isDismissable>
-                        <Dialog title="Output">
+                        <Dialog
+                          title={`Output (${formatter.format(
+                            tokenCount
+                          )} tokens)`}
+                        >
                           <pre className="overflow-scroll">
                             {formattedOutput}
                           </pre>
