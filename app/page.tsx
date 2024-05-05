@@ -437,16 +437,58 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="p-10">
-                          <div className="text-center">Coming soon: </div>
+                          <div className="text-center">Features: </div>
                           <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
                             <li>
-                              Word document (.docx) and PowerPoint (.pptx)
-                              support
+                              Switching between prompt structures (
+                              <b>Markdown</b>, <b>XML</b>, or <b>JSON</b>)
                             </li>
-                            <li>Parse images in PDFs</li>
-                            <li>Custom output formats</li>
-                            <li>Preambles</li>
-                            <li>Text editing</li>
+                            <li>
+                              Adding files nested in <b>directories</b>
+                            </li>
+                            <li>
+                              Automatically unarchiving <b>zip files</b>
+                            </li>
+                            <li>
+                              Parsing text from <b>PDFs</b>
+                            </li>
+                            <li>
+                              Parsing <b>Excel</b> files to comma-separated text
+                            </li>
+                            <li>Parsing text from images with OCR</li>
+                            <li>Reordering dropped files for the prompt</li>
+                            <li>
+                              <b>Removing</b> individual files or the entire
+                              prompt
+                            </li>
+                            <li>
+                              <b>Previewing</b> individual files or the entire
+                              prompt
+                            </li>
+                            <li>
+                              <b>Auto-copying</b> when the file list or settings
+                              are changed
+                            </li>
+                            <li>
+                              Viewing the <b>token count</b> for individual
+                              files and the entire prompt
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="p-10">
+                          <div className="text-center">Coming soon: </div>
+                          <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
+                            <li>Support for custom prompt structures</li>
+                            <li>
+                              Ability to paste text or files directly from the
+                              clipboard
+                            </li>
+                            <li>Support for ignoring files in gitignore</li>
+                            <li>
+                              Ability to edit the text content of dropped files
+                            </li>
+                            <li>Downloading the prompt as a file</li>
+                            <li>Support for more file types</li>
                             <li>More...</li>
                           </ul>
                         </div>
