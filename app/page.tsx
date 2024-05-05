@@ -492,6 +492,60 @@ export default function Home() {
                             <li>More...</li>
                           </ul>
                         </div>
+                        <div className="p-10">
+                          <div className="text-center">Alternatives: </div>
+                          <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
+                            <li>
+                              Command-line:{" "}
+                              <a
+                                className="underline"
+                                href="https://lib.rs/crates/code2prompt"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                code2prompt
+                              </a>
+                              ,{" "}
+                              <a
+                                className="underline"
+                                href="https://github.com/simonw/files-to-prompt"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                files-to-prompt
+                              </a>
+                              ,{" "}
+                              <a
+                                className="underline"
+                                href="https://github.com/3rd/promptpack"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                promptpack
+                              </a>
+                              ,{" "}
+                              <a
+                                className="underline"
+                                href="https://github.com/jimmc414/1filellm"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                1filellm
+                              </a>
+                            </li>
+                            <li>
+                              MacOS:{" "}
+                              <a
+                                className="underline"
+                                href="https://github.com/banagale/FileKitty"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                FileKitty
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
                         <SignUpFormReact />
                         <p className="text-center pt-8">
                           Made by{" "}
