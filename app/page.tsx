@@ -8,7 +8,7 @@ import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
 import SignUpFormReact from "@/components/SignupForm";
-import { formatJSON, formatMarkdown, formatXML } from "@/utils/outputUtils";
+import { formatMarkdown, formatXML } from "@/utils/outputUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropEvent } from "react-aria";
 import {
@@ -41,7 +41,6 @@ const options = [
     label: "Markdown",
     description: "## file.py \n\n```\ncode\n```",
   },
-  { id: "json", label: "JSON", description: '{\n"file.py": "code"\n}' },
   {
     id: "xml",
     label: "XML",
@@ -62,24 +61,11 @@ const markdownOptions = [
   },
 ];
 
-const jsonOptions = [
-  {
-    id: "json1",
-    label: "Key-value",
-    description: "{\n  name: content\n}",
-  },
-  {
-    id: "json2",
-    label: "Array of Objects",
-    description: '[\n {\n  "name": name\n  "content": content  \n  }\n]',
-  },
-];
-
 const xmlOptions = [
   {
     id: "xml1",
     label: "Option 1",
-    description: "<name>name</name>\n<content>content</content>",
+    description: "<file name=\"name\">content</file>",
   },
   {
     id: "xml2",
@@ -116,7 +102,6 @@ export default function Home() {
   let [selectedMarkdownOption, setSelectedMarkdownOption] = useState(
     markdownOptions[0].id
   );
-  let [selectedJsonOption, setSelectedJsonOption] = useState(jsonOptions[0].id);
   let [selectedXmlOption, setSelectedXmlOption] = useState(xmlOptions[0].id);
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
@@ -128,8 +113,6 @@ export default function Home() {
       switch (selectedOption) {
         case "markdown":
           return formatMarkdown(files, selectedMarkdownOption);
-        case "json":
-          return formatJSON(files, selectedJsonOption);
         case "xml":
           return formatXML(files, selectedXmlOption);
         default:
@@ -139,7 +122,6 @@ export default function Home() {
     return convertFilesToString();
   }, [
     files,
-    selectedJsonOption,
     selectedMarkdownOption,
     selectedOption,
     selectedXmlOption,
@@ -416,16 +398,6 @@ export default function Home() {
                             />
                           </div>
                           <div>
-                            <Text className="font-semibold text-lg">JSON</Text>
-                            <DetailedAnimatedRadioGroup
-                              label="JSON options"
-                              className="group-drop-target:blur-xl transition duration-500 ease-in-out my-3"
-                              options={jsonOptions}
-                              selectedOption={selectedJsonOption}
-                              setSelectedOption={setSelectedJsonOption}
-                            />
-                          </div>
-                          <div>
                             <Text className="font-semibold text-lg">XML</Text>
                             <DetailedAnimatedRadioGroup
                               label="XML options"
@@ -441,7 +413,7 @@ export default function Home() {
                           <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
                             <li>
                               Switching between prompt structures (
-                              <b>Markdown</b>, <b>XML</b>, or <b>JSON</b>)
+                              <b>Markdown</b> or <b>XML</b>)
                             </li>
                             <li>
                               Adding files nested in <b>directories</b>
