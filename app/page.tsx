@@ -24,16 +24,10 @@ import {
   DialogTrigger,
 } from "react-aria-components";
 import { toast } from "sonner";
-import { pdfjs } from "react-pdf";
-import { getTextFromPDF } from "@/utils/getTextFromPDF";
-import { getTextFromImage } from "@/utils/getTextFromImage";
 import { getTextFromExcelFile } from "@/utils/getTextFromExcelFile";
 import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
 import { getEncoding } from "js-tiktoken";
 import { NumberFormatter } from "@internationalized/number";
-
-pdfjs.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const options = [
   {
@@ -65,7 +59,7 @@ const xmlOptions = [
   {
     id: "xml1",
     label: "Option 1",
-    description: "<file name=\"name\">content</file>",
+    description: '<file name="name">content</file>',
   },
   {
     id: "xml2",
@@ -80,13 +74,11 @@ const xmlOptions = [
 //   "application/json,.py,.ts,.js,.html,.css,.xml,.md,.yaml,.",
 // ];
 
-let isImage = (file: FileDropItem) => file.type.startsWith("image/");
-let isPDF = (file: FileDropItem) => file.type === "application/pdf";
-let isExcel = (file: FileDropItem) =>
+let isExcel = (file: { type: string }) =>
   file.type === "application/vnd.ms-excel" ||
   file.type ===
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-let isZip = (file: FileDropItem) => file.type === "application/zip";
+let isZip = (file: { type: string }) => file.type === "application/zip";
 
 let formatter = new NumberFormatter("en-US");
 
@@ -120,12 +112,7 @@ export default function Home() {
       }
     };
     return convertFilesToString();
-  }, [
-    files,
-    selectedMarkdownOption,
-    selectedOption,
-    selectedXmlOption,
-  ]);
+  }, [files, selectedMarkdownOption, selectedOption, selectedXmlOption]);
   const encoding = getEncoding("cl100k_base");
   const tokenCount = useMemo(
     () => encoding.encode(formattedOutput).length,
@@ -162,17 +149,7 @@ export default function Home() {
         }
         const fileContent = await file.getFile();
         let newFile = { key: crypto.randomUUID(), name: file.name };
-        if (isImage(file)) {
-          newFiles.push({
-            ...newFile,
-            content: await getTextFromImage(fileContent),
-          });
-        } else if (isPDF(file)) {
-          newFiles.push({
-            ...newFile,
-            content: await getTextFromPDF(fileContent),
-          });
-        } else if (isExcel(file)) {
+        if (isExcel(file)) {
           newFiles.push({
             ...newFile,
             content: await getTextFromExcelFile(fileContent),
@@ -422,12 +399,8 @@ export default function Home() {
                               Automatically unarchiving <b>zip files</b>
                             </li>
                             <li>
-                              Parsing text from <b>PDFs</b>
-                            </li>
-                            <li>
                               Parsing <b>Excel</b> files to comma-separated text
                             </li>
-                            <li>Parsing text from images with OCR</li>
                             <li>Reordering dropped files for the prompt</li>
                             <li>
                               <b>Removing</b> individual files or the entire
