@@ -129,8 +129,9 @@ export default function Home() {
   let copyOutoutToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(formattedOutput);
+
       toast(
-        `Successfully copied prompt for <b>${files.length}</b> files in <b>${selectedOptionLabel}</b>!`
+        `Successfully copied prompt for ${files.length} files in ${selectedOptionLabel}!`
       );
     } catch (err) {
       console.error("Failed to copy files to clipboard:", err);
