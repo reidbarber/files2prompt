@@ -427,23 +427,6 @@ export default function Home() {
                           </ul>
                         </div>
                         <div className="p-10">
-                          <div className="text-center">Coming soon: </div>
-                          <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
-                            <li>Support for custom prompt structures</li>
-                            <li>
-                              Ability to paste text or files directly from the
-                              clipboard
-                            </li>
-                            <li>Support for ignoring files in gitignore</li>
-                            <li>
-                              Ability to edit the text content of dropped files
-                            </li>
-                            <li>Downloading the prompt as a file</li>
-                            <li>Support for more file types</li>
-                            <li>More...</li>
-                          </ul>
-                        </div>
-                        <div className="p-10">
                           <div className="text-center">Alternatives: </div>
                           <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
                             <li>
