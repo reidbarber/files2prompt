@@ -20,12 +20,11 @@ export const formatXML = (files: TextFile[], selectedOption: string) => {
     case "xml1":
       return `${files
         .map(
-          ({ name, content }) =>
-            `<file name="${name}">\n${content}\n</file>`
+          ({ name, content }) => `<file name="${name}">\n${content}\n</file>`
         )
         .join("\n")}\n`;
     case "xml2":
-      return `${files
+      return `<files>\n${files
         .map(
           ({ name, content }) =>
             `<file>\n  <name>${name}</name>\n  <content>${content}</content>\n</file>`
