@@ -98,6 +98,8 @@ export default function Home() {
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
   let [ignoreDsStore, setIgnoreDsStore] = useState(true);
+  const encoding = useMemo(() => getEncoding("cl100k_base"), []);
+
   let formattedOutput = useMemo(() => {
     const convertFilesToString = () => {
       if (files.length === 0) return "";
@@ -113,7 +115,7 @@ export default function Home() {
     };
     return convertFilesToString();
   }, [files, selectedMarkdownOption, selectedOption, selectedXmlOption]);
-  const encoding = getEncoding("cl100k_base");
+
   const tokenCount = useMemo(
     () => encoding.encode(formattedOutput).length,
     [encoding, formattedOutput]

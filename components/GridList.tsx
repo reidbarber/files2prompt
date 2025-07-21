@@ -10,7 +10,7 @@ import { tv } from "tailwind-variants";
 import { composeTailwindRenderProps, focusRing } from "./utils";
 import "./GridList.css";
 
-export function GridList<T extends object>({
+export const GridList = React.memo(function GridList<T extends object>({
   children,
   ...props
 }: GridListProps<T>) {
@@ -25,7 +25,7 @@ export function GridList<T extends object>({
       {children}
     </AriaGridList>
   );
-}
+}) as <T extends object>(props: GridListProps<T>) => React.ReactElement;
 
 const itemStyles = tv({
   extend: focusRing,
@@ -41,7 +41,7 @@ const itemStyles = tv({
   },
 });
 
-export function GridListItem({
+export const GridListItem = React.memo(function GridListItem({
   children,
   onRemove,
   ...props
@@ -80,4 +80,4 @@ export function GridListItem({
       )}
     </AriaGridListItem>
   );
-}
+});
