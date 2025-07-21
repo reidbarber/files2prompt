@@ -121,18 +121,21 @@ export default function Home() {
     [encoding, formattedOutput]
   );
 
+  const selectedOptionLabel = useMemo(
+    () => options.find((option) => option.id === selectedOption)?.label || "",
+    [selectedOption]
+  );
+
   let copyOutoutToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(formattedOutput);
       toast(
-        `Successfully copied prompt for <b>${files.length}</b> files in <b>${
-          options.find((option) => option.id === selectedOption)?.label
-        }</b>!`
+        `Successfully copied prompt for <b>${files.length}</b> files in <b>${selectedOptionLabel}</b>!`
       );
     } catch (err) {
       console.error("Failed to copy files to clipboard:", err);
     }
-  }, [formattedOutput, files.length, selectedOption]);
+  }, [formattedOutput, files.length, selectedOptionLabel]);
 
   useEffect(() => {
     if (autoCopy && files.length > 0) {
