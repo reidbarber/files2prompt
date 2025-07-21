@@ -60,7 +60,7 @@ export function Dialog({
               </svg>
             </RACButton>
           </div>
-          <p className="mt-3 text-slate-500 dark:text-zinc-400">{children}</p>
+          <div className="mt-3 text-slate-500 dark:text-zinc-400">{children}</div>
         </>
       )}
     </DialogWrapper>
