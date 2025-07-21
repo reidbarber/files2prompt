@@ -90,6 +90,7 @@ export interface TextFile {
 
 export default function Home() {
   let [files, setFiles] = useState<TextFile[]>([]);
+  let [isProcessing, setIsProcessing] = useState(false);
   let [selectedOption, setSelectedOption] = useState(options[0].id);
   let [selectedMarkdownOption, setSelectedMarkdownOption] = useState(
     markdownOptions[0].id
@@ -144,124 +145,155 @@ export default function Home() {
     }
   }, [autoCopy, copyOutoutToClipboard, files.length, formattedOutput]);
 
-  const handleDrop = async (e: DropEvent) => {
-    const newFiles: TextFile[] = [];
+  const processFileAsync = async (
+    entry: FileDropItem | DirectoryDropItem
+  ): Promise<TextFile[]> => {
+    const results: TextFile[] = [];
 
-    const processEntry = async (entry: FileDropItem | DirectoryDropItem) => {
-      if (entry.kind === "file") {
-        const file = entry as FileDropItem;
-        if (ignoreDsStore && file.name === ".DS_Store") {
-          return;
-        }
-        const fileContent = await file.getFile();
-        let newFile = { key: crypto.randomUUID(), name: file.name };
-        if (isExcel(file)) {
-          newFiles.push({
-            ...newFile,
-            content: await getTextFromExcelFile(fileContent),
-          });
-        } else if (isZip(file)) {
-          const zipReader = new ZipReader(new BlobReader(fileContent));
-
-          for (const entry of await zipReader.getEntries()) {
-            if (entry.directory) continue;
-
-            const fileContent = await entry.getData?.(new BlobWriter());
-            if (fileContent) {
-              const fileText = await new Response(fileContent).text();
-              newFiles.push({
-                key: crypto.randomUUID(),
-                name: entry.filename,
-                content: fileText,
-              });
-            }
-          }
-
-          await zipReader.close();
-        } else {
-          newFiles.push({
-            key: crypto.randomUUID(),
-            name: file.name,
-            content: await file.getText(),
-          });
-        }
-      } else if (entry.kind === "directory") {
-        const directory = entry as DirectoryDropItem;
-        for await (const nestedEntry of directory.getEntries()) {
-          await processEntry(nestedEntry);
-        }
+    if (entry.kind === "file") {
+      const file = entry as FileDropItem;
+      if (ignoreDsStore && file.name === ".DS_Store") {
+        return results;
       }
-    };
-
-    for (const item of e.items) {
-      if (item.kind === "text") {
-        const textItem = item as TextDropItem;
-        const content = await textItem.getText("text/plain");
-        newFiles.push({
-          key: crypto.randomUUID(),
-          name: "untitled.txt", // TODO: Can we auto-detect the format?
-          content,
+      const fileContent = await file.getFile();
+      let newFile = { key: crypto.randomUUID(), name: file.name };
+      if (isExcel(file)) {
+        results.push({
+          ...newFile,
+          content: await getTextFromExcelFile(fileContent),
         });
-      } else if (item.kind === "file" || item.kind === "directory") {
-        await processEntry(item as FileDropItem | DirectoryDropItem);
+      } else if (isZip(file)) {
+        const zipReader = new ZipReader(new BlobReader(fileContent));
+
+        for (const entry of await zipReader.getEntries()) {
+          if (entry.directory) continue;
+
+          const fileContent = await entry.getData?.(new BlobWriter());
+          if (fileContent) {
+            const fileText = await new Response(fileContent).text();
+            results.push({
+              key: crypto.randomUUID(),
+              name: entry.filename,
+              content: fileText,
+            });
+          }
+        }
+
+        await zipReader.close();
+      } else {
+        results.push({
+          key: crypto.randomUUID(),
+          name: file.name,
+          content: await file.getText(),
+        });
+      }
+    } else if (entry.kind === "directory") {
+      const directory = entry as DirectoryDropItem;
+      for await (const nestedEntry of directory.getEntries()) {
+        const nestedResults = await processFileAsync(nestedEntry);
+        results.push(...nestedResults);
       }
     }
+    return results;
+  };
 
-    setFiles((prevFiles) =>
-      replaceOnDrop ? newFiles : [...prevFiles, ...newFiles]
-    );
+  const handleDrop = async (e: DropEvent) => {
+    setIsProcessing(true);
+
+    try {
+      const processingPromises: Promise<TextFile[]>[] = [];
+
+      for (const item of e.items) {
+        if (item.kind === "text") {
+          const textItem = item as TextDropItem;
+          const promise = textItem.getText("text/plain").then((content) => [
+            {
+              key: crypto.randomUUID(),
+              name: "untitled.txt",
+              content,
+            },
+          ]);
+          processingPromises.push(promise);
+        } else if (item.kind === "file" || item.kind === "directory") {
+          processingPromises.push(
+            processFileAsync(item as FileDropItem | DirectoryDropItem)
+          );
+        }
+      }
+
+      const results = await Promise.all(processingPromises);
+      const newFiles = results.flat();
+
+      setFiles((prevFiles) =>
+        replaceOnDrop ? newFiles : [...prevFiles, ...newFiles]
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleSelect = async (fileList: FileList | null) => {
     if (!fileList) return;
-    const newFiles: TextFile[] = [];
 
-    const processFile = async (file: File) => {
-      const content = await file.text();
-      newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
-    };
+    setIsProcessing(true);
 
-    const processDirectory = async (entry: FileSystemDirectoryEntry) => {
-      const reader = entry.createReader();
-      const entries = await new Promise<FileSystemEntry[]>((resolve) => {
-        reader.readEntries((entries) => resolve(entries));
-      });
+    try {
+      const newFiles: TextFile[] = [];
 
-      for (const nestedEntry of entries) {
-        if (nestedEntry.isFile) {
-          const file = await new Promise<File>((resolve) => {
-            (nestedEntry as FileSystemFileEntry).file(resolve);
-          });
-          await processFile(file);
-        } else if (nestedEntry.isDirectory) {
-          await processDirectory(nestedEntry as FileSystemDirectoryEntry);
+      const processFile = async (file: File) => {
+        const content = await file.text();
+        newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
+      };
+
+      const processDirectory = async (entry: FileSystemDirectoryEntry) => {
+        const reader = entry.createReader();
+        const entries = await new Promise<FileSystemEntry[]>((resolve) => {
+          reader.readEntries((entries) => resolve(entries));
+        });
+
+        const processingPromises: Promise<void>[] = [];
+
+        for (const nestedEntry of entries) {
+          if (nestedEntry.isFile) {
+            const promise = new Promise<File>((resolve) => {
+              (nestedEntry as FileSystemFileEntry).file(resolve);
+            }).then(processFile);
+            processingPromises.push(promise);
+          } else if (nestedEntry.isDirectory) {
+            processingPromises.push(
+              processDirectory(nestedEntry as FileSystemDirectoryEntry)
+            );
+          }
+        }
+
+        await Promise.all(processingPromises);
+      };
+
+      const files = Array.from(fileList);
+      const processingPromises: Promise<void>[] = [];
+
+      for (const file of files) {
+        if (ignoreDsStore && file.name === ".DS_Store") {
+          continue;
+        }
+        if (file.webkitRelativePath) {
+          const promise = new Promise<FileSystemDirectoryEntry>((resolve) => {
+            (window as any).webkitResolveLocalFileSystemURL(
+              file.webkitRelativePath,
+              (entry: FileSystemDirectoryEntry) => resolve(entry)
+            );
+          }).then(processDirectory);
+          processingPromises.push(promise);
+        } else {
+          processingPromises.push(processFile(file));
         }
       }
-    };
 
-    const files = Array.from(fileList);
-
-    for (const file of files) {
-      if (ignoreDsStore && file.name === ".DS_Store") {
-        continue;
-      }
-      if (file.webkitRelativePath) {
-        // Handle directory
-        const entry = await new Promise<FileSystemDirectoryEntry>((resolve) => {
-          (window as any).webkitResolveLocalFileSystemURL(
-            file.webkitRelativePath,
-            (entry: FileSystemDirectoryEntry) => resolve(entry)
-          );
-        });
-        await processDirectory(entry);
-      } else {
-        // Handle regular file
-        await processFile(file);
-      }
+      await Promise.all(processingPromises);
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    } finally {
+      setIsProcessing(false);
     }
-
-    // TODO: Should select obey replaceOnDrop?
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
   let isListDragging = useRef(false);
@@ -321,8 +353,19 @@ export default function Home() {
       >
         {({ isDropTarget }) => (
           <div className="p-4 sm:p-8 rounded-lg flex flex-col justify-between h-full">
+            {isProcessing && (
+              <div className="absolute inset-0 z-20 rounded-lg h-dvh flex items-center justify-center bg-white/80 dark:bg-black/80">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
+                  <Text className="font-semibold text-lg text-black dark:text-white">
+                    Processing files...
+                  </Text>
+                </div>
+              </div>
+            )}
             {isDropTarget &&
               !isListDragging.current &&
+              !isProcessing &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
                 <div className="absolute inset-0 z-10 rounded-lg h-dvh flex items-center justify-center">
                   <Text className="font-semibold text-5xl text-black dark:text-white drop-shadow-2xl">
@@ -615,9 +658,9 @@ export default function Home() {
                     <FileTrigger
                       // acceptedFileTypes={acceptedFileTypes}
                       allowsMultiple
-                      onSelect={handleSelect}
+                      onSelect={isProcessing ? undefined : handleSelect}
                     >
-                      <Button>Add</Button>
+                      <Button isDisabled={isProcessing}>Add</Button>
                     </FileTrigger>
                   </div>
                 </>
@@ -634,10 +677,13 @@ export default function Home() {
                     <FileTrigger
                       // acceptedFileTypes={acceptedFileTypes}
                       allowsMultiple
-                      onSelect={handleSelect}
+                      onSelect={isProcessing ? undefined : handleSelect}
                     >
-                      <RACButton className="mt-1 rounded-md border border-slate-600 dark:border-slate-100 dark:hover:border-slate-300 px-2 py-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2  ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out">
-                        Select
+                      <RACButton
+                        className="mt-1 rounded-md border border-slate-600 dark:border-slate-100 dark:hover:border-slate-300 px-2 py-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2  ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                        isDisabled={isProcessing}
+                      >
+                        {isProcessing ? "Processing..." : "Select"}
                       </RACButton>
                     </FileTrigger>
                   </div>
