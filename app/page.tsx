@@ -24,16 +24,10 @@ import {
   DialogTrigger,
 } from "react-aria-components";
 import { toast } from "sonner";
-import { pdfjs } from "react-pdf";
-import { getTextFromPDF } from "@/utils/getTextFromPDF";
-import { getTextFromImage } from "@/utils/getTextFromImage";
 import { getTextFromExcelFile } from "@/utils/getTextFromExcelFile";
 import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
 import { getEncoding } from "js-tiktoken";
 import { NumberFormatter } from "@internationalized/number";
-
-pdfjs.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const options = [
   {
@@ -65,7 +59,7 @@ const xmlOptions = [
   {
     id: "xml1",
     label: "Option 1",
-    description: "<file name=\"name\">content</file>",
+    description: '<file name="name">content</file>',
   },
   {
     id: "xml2",
@@ -80,13 +74,11 @@ const xmlOptions = [
 //   "application/json,.py,.ts,.js,.html,.css,.xml,.md,.yaml,.",
 // ];
 
-let isImage = (file: FileDropItem) => file.type.startsWith("image/");
-let isPDF = (file: FileDropItem) => file.type === "application/pdf";
-let isExcel = (file: FileDropItem) =>
+let isExcel = (file: { type: string }) =>
   file.type === "application/vnd.ms-excel" ||
   file.type ===
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-let isZip = (file: FileDropItem) => file.type === "application/zip";
+let isZip = (file: { type: string }) => file.type === "application/zip";
 
 let formatter = new NumberFormatter("en-US");
 
@@ -106,6 +98,8 @@ export default function Home() {
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
   let [ignoreDsStore, setIgnoreDsStore] = useState(true);
+  const encoding = useMemo(() => getEncoding("cl100k_base"), []);
+
   let formattedOutput = useMemo(() => {
     const convertFilesToString = () => {
       if (files.length === 0) return "";
@@ -120,30 +114,29 @@ export default function Home() {
       }
     };
     return convertFilesToString();
-  }, [
-    files,
-    selectedMarkdownOption,
-    selectedOption,
-    selectedXmlOption,
-  ]);
-  const encoding = getEncoding("cl100k_base");
+  }, [files, selectedMarkdownOption, selectedOption, selectedXmlOption]);
+
   const tokenCount = useMemo(
     () => encoding.encode(formattedOutput).length,
     [encoding, formattedOutput]
   );
 
+  const selectedOptionLabel = useMemo(
+    () => options.find((option) => option.id === selectedOption)?.label || "",
+    [selectedOption]
+  );
+
   let copyOutoutToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(formattedOutput);
+
       toast(
-        `Successfully copied prompt for <b>${files.length}</b> files in <b>${
-          options.find((option) => option.id === selectedOption)?.label
-        }</b>!`
+        `Successfully copied prompt for ${files.length} files in ${selectedOptionLabel}!`
       );
     } catch (err) {
       console.error("Failed to copy files to clipboard:", err);
     }
-  }, [formattedOutput, files.length, selectedOption]);
+  }, [formattedOutput, files.length, selectedOptionLabel]);
 
   useEffect(() => {
     if (autoCopy && files.length > 0) {
@@ -162,17 +155,7 @@ export default function Home() {
         }
         const fileContent = await file.getFile();
         let newFile = { key: crypto.randomUUID(), name: file.name };
-        if (isImage(file)) {
-          newFiles.push({
-            ...newFile,
-            content: await getTextFromImage(fileContent),
-          });
-        } else if (isPDF(file)) {
-          newFiles.push({
-            ...newFile,
-            content: await getTextFromPDF(fileContent),
-          });
-        } else if (isExcel(file)) {
+        if (isExcel(file)) {
           newFiles.push({
             ...newFile,
             content: await getTextFromExcelFile(fileContent),
@@ -422,12 +405,8 @@ export default function Home() {
                               Automatically unarchiving <b>zip files</b>
                             </li>
                             <li>
-                              Parsing text from <b>PDFs</b>
-                            </li>
-                            <li>
                               Parsing <b>Excel</b> files to comma-separated text
                             </li>
-                            <li>Parsing text from images with OCR</li>
                             <li>Reordering dropped files for the prompt</li>
                             <li>
                               <b>Removing</b> individual files or the entire
@@ -445,23 +424,6 @@ export default function Home() {
                               Viewing the <b>token count</b> for individual
                               files and the entire prompt
                             </li>
-                          </ul>
-                        </div>
-                        <div className="p-10">
-                          <div className="text-center">Coming soon: </div>
-                          <ul className="list-disc px-5 md:px-10 xl:px-28 pt-5">
-                            <li>Support for custom prompt structures</li>
-                            <li>
-                              Ability to paste text or files directly from the
-                              clipboard
-                            </li>
-                            <li>Support for ignoring files in gitignore</li>
-                            <li>
-                              Ability to edit the text content of dropped files
-                            </li>
-                            <li>Downloading the prompt as a file</li>
-                            <li>Support for more file types</li>
-                            <li>More...</li>
                           </ul>
                         </div>
                         <div className="p-10">
@@ -507,6 +469,15 @@ export default function Home() {
                             </li>
                             <li>
                               MacOS:{" "}
+                              <a
+                                className="underline"
+                                href="https://repoprompt.com/"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                RepoPrompt
+                              </a>
+                              ,{" "}
                               <a
                                 className="underline"
                                 href="https://github.com/banagale/FileKitty"

@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { Radio, RadioGroup } from "react-aria-components";
 import { composeTailwindRenderProps } from "./utils";
@@ -16,7 +17,7 @@ interface AnimatedRadioGroupProps {
   label?: string;
 }
 
-export function AnimatedRadioGroup({
+export const AnimatedRadioGroup = React.memo(function AnimatedRadioGroup({
   options,
   selectedOption,
   setSelectedOption,
@@ -59,4 +60,4 @@ export function AnimatedRadioGroup({
       ))}
     </RadioGroup>
   );
-}
+});

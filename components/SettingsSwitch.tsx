@@ -15,12 +15,13 @@ export function SettingsSwitch({
     <Switch
       isSelected={isSelected}
       onChange={onChange}
-      className="group flex gap-2 items-center text-black dark:text-white font-semibold text-lg"
+      className="group inline-flex touch-none items-center gap-2 text-black dark:text-white font-semibold text-lg"
+      style={{ WebkitTapHighlightColor: "transparent" }}
     >
       {label}
-      <div className="flex h-[26px] w-[44px] shrink-0 cursor-default rounded-full shadow-inner bg-clip-padding border border-solid border-white/30 p-[3px] box-border transition duration-200 ease-in-out bg-slate-400 group-pressed:bg-slate-500 group-selected:bg-green-500 group-selected:group-pressed:bg-green-600 outline-none group-focus-visible:outline-slate-800 dark:group-focus-visible:outline-white outline-2">
-        <span className="h-[18px] w-[18px] transform rounded-full bg-white shadow transition duration-200 ease-in-out translate-x-0 group-selected:translate-x-[100%]" />
-      </div>
+      <span className="group-data-[selected]:bg-green-500 group-data-[focus-visible]:ring-2 h-6 w-9 cursor-pointer rounded-full border-2 border-transparent bg-slate-400 ring-offset-2 ring-offset-white dark:ring-offset-black transition duration-200">
+        <span className="group-data-[selected]:ml-3 group-data-[selected]:group-data-[pressed]:ml-2 group-data-[pressed]:w-6 block h-5 w-5 origin-right rounded-full bg-white shadow transition-all duration-200" />
+      </span>
     </Switch>
   );
 }
