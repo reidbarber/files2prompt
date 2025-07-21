@@ -484,6 +484,15 @@ export default function Home() {
                               MacOS:{" "}
                               <a
                                 className="underline"
+                                href="https://repoprompt.com/"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                RepoPrompt
+                              </a>
+                              ,{" "}
+                              <a
+                                className="underline"
                                 href="https://github.com/banagale/FileKitty"
                                 target="_blank"
                                 rel="noreferrer"
