@@ -1717,7 +1717,7 @@
   resolved "https://registry.yarnpkg.com/@vercel/analytics/-/analytics-1.5.0.tgz#073f93694897414b21a8495e2619bbf64447dcaa"
   integrity sha512-MYsBzfPki4gthY5HnYN7jgInhAZ7Ac1cYDoRWFomwGHWEX7odTEzbtg9kf/QSo7XEsEAqlQugA6gJ2WS2DEa3g==
 
-"@zip.js/zip.js@^2.7.41":
+"@zip.js/zip.js@^2.7.64":
   version "2.7.64"
   resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.7.64.tgz#94a189d6f4f3a1c9457d4c55ed64c10826235658"
   integrity sha512-x6BDiDTKeZWbeHgHlVzV1sqReGuz4b1R4cVStUDua8OSq4bRreZeiJKPFFlvJs67FvCnetq33aYb/XH73EQhdA==
@@ -3184,7 +3184,7 @@ jiti@^1.21.6:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.7.tgz#9dd81043424a3d28458b193d965f0d18a2300ba9"
   integrity sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==
 
-js-tiktoken@^1.0.11:
+js-tiktoken@^1.0.20:
   version "1.0.20"
   resolved "https://registry.yarnpkg.com/js-tiktoken/-/js-tiktoken-1.0.20.tgz#fa2733bf147acaf1bdcf9ab8a878e79c581c95f2"
   integrity sha512-Xlaqhhs8VfCd6Sh7a1cFkZHQbYTLCwVJJWiHVxBYzLPxW0XsoxBy1hitmjkdIjD3Aon5BXLHFwU5O8WUx6HH+A==
@@ -3705,7 +3705,7 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-react-aria-components@^1.1.1:
+react-aria-components@^1.10.1:
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/react-aria-components/-/react-aria-components-1.10.1.tgz#583b8e62dcf54d1ea50b04a70c183ce01addbf2e"
   integrity sha512-Mllbk2pQax2EwlOJsXG4oTp6P7P33m82/47M9Os+zaGhSCqo2EilFvThxCFxhLa7ncjLV0ka6wFIYLmZiOcWxw==
@@ -3739,7 +3739,7 @@ react-aria-components@^1.1.1:
     react-stately "^3.39.0"
     use-sync-external-store "^1.4.0"
 
-react-aria@^3.32.1, react-aria@^3.41.1:
+react-aria@^3.41.1:
   version "3.41.1"
   resolved "https://registry.yarnpkg.com/react-aria/-/react-aria-3.41.1.tgz#7d6a97a1248d4647821e72da0023aab2715220bb"
   integrity sha512-5mujwnW6/NHvONDecb7DiWkzI27dzBO1auKt4KkgNuW+Awud1LCaK/NOlHp4xZl3fSfh1ROpdAKERHCh7nvAAQ==
@@ -3800,7 +3800,7 @@ react-is@^16.13.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-react-stately@^3.30.1, react-stately@^3.39.0:
+react-stately@^3.39.0:
   version "3.39.0"
   resolved "https://registry.yarnpkg.com/react-stately/-/react-stately-3.39.0.tgz#9eafdf40d6b08ee7b9f8724342b15b2e27154f90"
   integrity sha512-/8JC3Tmj7G8fHn47F88c6t5kFNhQAufwqjEKxYeNi7TPz9UL+35BeoH1poMmDHJsPz8qM/z4sWMzaW5AwYK8lQ==
@@ -4267,10 +4267,10 @@ tailwindcss-animate@^1.0.7:
   resolved "https://registry.yarnpkg.com/tailwindcss-animate/-/tailwindcss-animate-1.0.7.tgz#318b692c4c42676cc9e67b19b78775742388bef4"
   integrity sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==
 
-tailwindcss-react-aria-components@^1.1.1:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/tailwindcss-react-aria-components/-/tailwindcss-react-aria-components-1.2.0.tgz#7f5125fba759d7c9d71354941289fcc31793f4cd"
-  integrity sha512-ynlQIfAdoWAz0Og0dCe/d4QVE+L8Yuo6rtK9apdhehZZMoLC1GdwtnvLZyUyx+wHwnTjRuNtFPdN0DpPsPXJJg==
+tailwindcss-react-aria-components@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/tailwindcss-react-aria-components/-/tailwindcss-react-aria-components-2.0.0.tgz#25d5d0a4edf5718112dda055a968f48b2a7dd29a"
+  integrity sha512-l8YdpXX//qx0Mz2bW3YKLjboTQxR3zLrFhlHniAIn+mTwVM1yvT0Jp7Pn3eFrqi+qtOMmcJzXaF2rsKezSr0SQ==
 
 tailwindcss@^3.3.0:
   version "3.4.17"
