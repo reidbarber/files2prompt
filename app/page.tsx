@@ -80,6 +80,68 @@ let isExcel = (file: { type: string }) =>
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 let isZip = (file: { type: string }) => file.type === "application/zip";
 
+const shouldIgnoreFile = (filename: string): boolean => {
+  const lowerName = filename.toLowerCase();
+
+  // System files
+  if (
+    lowerName === ".ds_store" ||
+    lowerName === "thumbs.db" ||
+    lowerName === "ehthumbs.db" ||
+    lowerName === "desktop.ini" ||
+    lowerName === ".directory"
+  ) {
+    return true;
+  }
+
+  // System directories
+  if (
+    filename.startsWith("__MACOSX/") ||
+    filename.startsWith("$RECYCLE.BIN/") ||
+    filename.startsWith(".Trash-") ||
+    filename.startsWith(".fuse_hidden")
+  ) {
+    return true;
+  }
+
+  // Version control
+  if (
+    filename.startsWith(".git/") ||
+    filename.startsWith(".svn/") ||
+    filename.startsWith(".hg/") ||
+    filename.startsWith(".bzr/")
+  ) {
+    return true;
+  }
+
+  // IDE/Editor files
+  if (
+    filename.startsWith(".vscode/") ||
+    filename.startsWith(".idea/") ||
+    lowerName.endsWith(".swp") ||
+    lowerName.endsWith(".swo") ||
+    lowerName.endsWith("~")
+  ) {
+    return true;
+  }
+
+  // Package managers and build artifacts
+  if (
+    filename.startsWith("node_modules/") ||
+    filename.startsWith("__pycache__/") ||
+    filename.startsWith("vendor/") ||
+    filename.startsWith("dist/") ||
+    filename.startsWith("build/") ||
+    lowerName.endsWith(".pyc") ||
+    lowerName.endsWith(".class") ||
+    lowerName.endsWith(".o")
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 let formatter = new NumberFormatter("en-US");
 
 export interface TextFile {
@@ -98,7 +160,7 @@ export default function Home() {
   let [selectedXmlOption, setSelectedXmlOption] = useState(xmlOptions[0].id);
   let [autoCopy, setAutoCopy] = useState(true);
   let [replaceOnDrop, setReplaceOnDrop] = useState(false);
-  let [ignoreDsStore, setIgnoreDsStore] = useState(true);
+  let [ignoreSystemFiles, setIgnoreSystemFiles] = useState(true);
   const encoding = useMemo(() => getEncoding("cl100k_base"), []);
 
   let formattedOutput = useMemo(() => {
@@ -152,7 +214,7 @@ export default function Home() {
 
     if (entry.kind === "file") {
       const file = entry as FileDropItem;
-      if (ignoreDsStore && file.name === ".DS_Store") {
+      if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
         return results;
       }
       const fileContent = await file.getFile();
@@ -167,7 +229,7 @@ export default function Home() {
 
         for (const entry of await zipReader.getEntries()) {
           if (entry.directory) continue;
-          if (entry.filename.startsWith('__MACOSX/')) continue;
+          if (shouldIgnoreFile(entry.filename)) continue;
 
           const fileContent = await entry.getData?.(new BlobWriter());
           if (fileContent) {
@@ -242,6 +304,9 @@ export default function Home() {
       const newFiles: TextFile[] = [];
 
       const processFile = async (file: File) => {
+        if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+          return;
+        }
         const content = await file.text();
         newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
       };
@@ -274,7 +339,7 @@ export default function Home() {
       const processingPromises: Promise<void>[] = [];
 
       for (const file of files) {
-        if (ignoreDsStore && file.name === ".DS_Store") {
+        if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
           continue;
         }
         if (file.webkitRelativePath) {
@@ -406,9 +471,9 @@ export default function Home() {
                             onChange={setReplaceOnDrop}
                           />
                           <SettingsSwitch
-                            label="Ignore .DS_Store"
-                            isSelected={ignoreDsStore}
-                            onChange={setIgnoreDsStore}
+                            label="Ignore system files"
+                            isSelected={ignoreSystemFiles}
+                            onChange={setIgnoreSystemFiles}
                           />
                         </div>
                         <div className="text-center flex flex-col gap-10">
