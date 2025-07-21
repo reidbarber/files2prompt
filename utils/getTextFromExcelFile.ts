@@ -1,6 +1,6 @@
-import { read, utils } from "xlsx";
-
 export const getTextFromExcelFile = async (file: File) => {
+  const { read, utils } = await import("xlsx");
+
   const arrayBuffer = await file.arrayBuffer();
   const wb = read(arrayBuffer);
   let text = "";
