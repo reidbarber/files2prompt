@@ -167,6 +167,7 @@ export default function Home() {
 
         for (const entry of await zipReader.getEntries()) {
           if (entry.directory) continue;
+          if (entry.filename.startsWith('__MACOSX/')) continue;
 
           const fileContent = await entry.getData?.(new BlobWriter());
           if (fileContent) {
