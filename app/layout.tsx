@@ -30,17 +30,19 @@ export default function RootLayout({
         <meta property="og:url" content="https://files2prompt.com" />
         <meta property="og:image" content="/og-image.png" />
       </Head>
-      <body className={inter.className}>{children}</body>
-      <Toaster
-        toastOptions={{
-          style: {
-            background: "green",
-            color: "white",
-          },
-          className: "class",
-        }}
-      />
-      <Analytics />
+      <body className={inter.className}>
+        {children}
+        <Toaster
+          toastOptions={{
+            style: {
+              background: "green",
+              color: "white",
+            },
+            className: "class",
+          }}
+        />
+        <Analytics />
+      </body>
     </html>
   );
 }
