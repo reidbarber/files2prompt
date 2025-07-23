@@ -7,7 +7,6 @@ import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
-import SignUpFormReact from "@/components/SignupForm";
 import { formatMarkdown, formatXML } from "@/utils/outputUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropEvent } from "react-aria";
@@ -69,10 +68,75 @@ const xmlOptions = [
   },
 ];
 
-// const acceptedFileTypes = [
-//   "text/*",
-//   "application/json,.py,.ts,.js,.html,.css,.xml,.md,.yaml,.",
-// ];
+const acceptedFileTypes = [
+  "text/*",
+  "application/json",
+  "application/javascript",
+  "application/typescript",
+  "application/xml",
+  "application/x-yaml",
+  "application/yaml",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/zip",
+  // Common text file extensions
+  ".txt",
+  ".md",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".json",
+  ".xml",
+  ".html",
+  ".htm",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".py",
+  ".java",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
+  ".cs",
+  ".php",
+  ".rb",
+  ".go",
+  ".rs",
+  ".swift",
+  ".kt",
+  ".scala",
+  ".sh",
+  ".bash",
+  ".zsh",
+  ".fish",
+  ".ps1",
+  ".bat",
+  ".cmd",
+  ".sql",
+  ".r",
+  ".m",
+  ".pl",
+  ".lua",
+  ".vim",
+  ".dockerfile",
+  ".gitignore",
+  ".env",
+  ".ini",
+  ".cfg",
+  ".conf",
+  ".config",
+  ".toml",
+  ".yaml",
+  ".yml",
+  ".log",
+  ".csv",
+  ".tsv",
+  ".rtf",
+  ".swift",
+];
 
 // Maximum file sizes
 const MAX_REGULAR_FILE_SIZE = 5 * 1024 * 1024; // 5MB for regular text files
@@ -83,6 +147,106 @@ let isExcel = (file: { type: string }) =>
   file.type ===
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 let isZip = (file: { type: string }) => file.type === "application/zip";
+
+// Define accepted file types
+const ACCEPTED_TEXT_TYPES = [
+  "text/",
+  "application/json",
+  "application/javascript",
+  "application/typescript",
+  "application/xml",
+  "application/x-yaml",
+  "application/yaml",
+];
+
+const ACCEPTED_FILE_EXTENSIONS = [
+  ".txt",
+  ".md",
+  ".markdown",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".json",
+  ".xml",
+  ".html",
+  ".htm",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".py",
+  ".java",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
+  ".cs",
+  ".php",
+  ".rb",
+  ".go",
+  ".rs",
+  ".swift",
+  ".kt",
+  ".scala",
+  ".sh",
+  ".bash",
+  ".zsh",
+  ".fish",
+  ".ps1",
+  ".bat",
+  ".cmd",
+  ".sql",
+  ".r",
+  ".m",
+  ".pl",
+  ".lua",
+  ".vim",
+  ".dockerfile",
+  ".gitignore",
+  ".env",
+  ".ini",
+  ".cfg",
+  ".conf",
+  ".config",
+  ".toml",
+  ".yaml",
+  ".yml",
+  ".log",
+  ".csv",
+  ".tsv",
+  ".rtf",
+  ".tex",
+  ".latex",
+  ".bib",
+  ".org",
+  ".rst",
+  ".adoc",
+];
+
+const isTextFile = (file: { type: string; name: string }): boolean => {
+  // Check MIME type
+  if (ACCEPTED_TEXT_TYPES.some((type) => file.type.startsWith(type))) {
+    return true;
+  }
+
+  // Check file extension
+  const fileName = file.name.toLowerCase();
+  if (ACCEPTED_FILE_EXTENSIONS.some((ext) => fileName.endsWith(ext))) {
+    return true;
+  }
+
+  // Special case for files without extensions that are likely text
+  if (!file.type && !fileName.includes(".")) {
+    return true; // Files like "README", "LICENSE", etc.
+  }
+
+  return false;
+};
+
+const isSupportedFileType = (file: { type: string; name: string }): boolean => {
+  return isTextFile(file) || isExcel(file) || isZip(file);
+};
 
 const validateFileSize = (
   file: { size: number; name: string },
@@ -327,6 +491,12 @@ export default function Home() {
             return results;
           }
 
+          // Check if file type is supported
+          if (!isSupportedFileType(file)) {
+            // toast.warning(`Skipped unsupported file: ${file.name}`);
+            return results;
+          }
+
           const fileContent = await file.getFile();
           let newFile = { key: crypto.randomUUID(), name: file.name };
 
@@ -348,6 +518,12 @@ export default function Home() {
               for (const entry of entries) {
                 if (entry.directory) continue;
                 if (shouldIgnoreFile(entry.filename)) continue;
+
+                // Check if file within ZIP is a supported text file
+                const mockFile = { type: "", name: entry.filename };
+                if (!isTextFile(mockFile)) {
+                  continue;
+                }
 
                 const entryFileContent = await entry.getData?.(
                   new BlobWriter()
@@ -375,8 +551,8 @@ export default function Home() {
                 console.error("Error closing ZIP reader:", closeError);
               }
             }
-          } else {
-            // Validate regular file size
+          } else if (isTextFile(file)) {
+            // Handle regular text files
             validateFileSize(fileContent, MAX_REGULAR_FILE_SIZE);
 
             results.push({
@@ -384,6 +560,11 @@ export default function Home() {
               name: file.name,
               content: await file.getText(),
             });
+          } else {
+            // Shouldn't happen due to the earlier check, but just in case
+            console.warn(
+              `Unexpected file type after validation: ${file.name} (${file.type})`
+            );
           }
         } else if (entry.kind === "directory") {
           const directory = entry as DirectoryDropItem;
@@ -506,6 +687,12 @@ export default function Home() {
         const processFile = async (file: File) => {
           try {
             if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+              return;
+            }
+
+            // Check if file type is supported (only text files for file selector)
+            if (!isTextFile(file)) {
+              // toast.warning(`Skipped unsupported file: ${file.name}`);
               return;
             }
 
@@ -956,7 +1143,7 @@ export default function Home() {
                       </Modal>
                     </DialogTrigger>
                     <FileTrigger
-                      // acceptedFileTypes={acceptedFileTypes}
+                      acceptedFileTypes={acceptedFileTypes}
                       allowsMultiple
                       onSelect={isProcessing ? undefined : handleSelect}
                     >
@@ -975,7 +1162,7 @@ export default function Home() {
                   <div>or</div>
                   <div className="text-center">
                     <FileTrigger
-                      // acceptedFileTypes={acceptedFileTypes}
+                      acceptedFileTypes={acceptedFileTypes}
                       allowsMultiple
                       onSelect={isProcessing ? undefined : handleSelect}
                     >
