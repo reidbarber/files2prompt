@@ -615,13 +615,33 @@ export default function Home() {
         for (const item of e.items) {
           if (item.kind === "text") {
             const textItem = item as TextDropItem;
-            const promise = textItem.getText("text/plain").then((content) => [
-              {
-                key: crypto.randomUUID(),
-                name: "untitled.txt",
-                content,
-              },
-            ]);
+            const promise = textItem
+              .getText("application/x-gridlist-key")
+              .then((keyData) => {
+                // If this item has our custom key data, it was dragged from our GridList
+                if (keyData) {
+                  return []; // Return empty array to ignore this drop
+                }
+
+                // Otherwise, process as normal text content
+                return textItem.getText("text/plain").then((content) => [
+                  {
+                    key: crypto.randomUUID(),
+                    name: "untitled.txt",
+                    content,
+                  },
+                ]);
+              })
+              .catch(() => {
+                // If getting the custom key fails, fall back to processing as text
+                return textItem.getText("text/plain").then((content) => [
+                  {
+                    key: crypto.randomUUID(),
+                    name: "untitled.txt",
+                    content,
+                  },
+                ]);
+              });
             processingPromises.push(promise);
           } else if (item.kind === "file" || item.kind === "directory") {
             processingPromises.push(
@@ -816,7 +836,10 @@ export default function Home() {
     getItems: (keys) =>
       files
         .filter((file) => keys.has(file.key))
-        .map((file) => ({ "text/plain": file.name })),
+        .map((file) => ({
+          "text/plain": file.name,
+          "application/x-gridlist-key": String(file.key),
+        })),
     onReorder(e) {
       if (e.target.dropPosition === "before") {
         setFiles((prevFiles) =>
