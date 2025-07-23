@@ -74,11 +74,30 @@ const xmlOptions = [
 //   "application/json,.py,.ts,.js,.html,.css,.xml,.md,.yaml,.",
 // ];
 
+// Maximum file sizes
+const MAX_REGULAR_FILE_SIZE = 5 * 1024 * 1024; // 5MB for regular text files
+const MAX_ZIP_FILE_SIZE = 50 * 1024 * 1024; // 50MB for ZIP files (can contain multiple files)
+
 let isExcel = (file: { type: string }) =>
   file.type === "application/vnd.ms-excel" ||
   file.type ===
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 let isZip = (file: { type: string }) => file.type === "application/zip";
+
+const validateFileSize = (
+  file: { size: number; name: string },
+  maxSize: number
+): void => {
+  if (file.size > maxSize) {
+    throw new Error(
+      `File "${file.name}" (${Math.round(
+        file.size / 1024 / 1024
+      )}MB) exceeds maximum allowed size of ${Math.round(
+        maxSize / 1024 / 1024
+      )}MB`
+    );
+  }
+};
 
 const shouldIgnoreFile = (filename: string): boolean => {
   const lowerName = filename.toLowerCase();
@@ -212,52 +231,82 @@ export default function Home() {
   ): Promise<TextFile[]> => {
     const results: TextFile[] = [];
 
-    if (entry.kind === "file") {
-      const file = entry as FileDropItem;
-      if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
-        return results;
-      }
-      const fileContent = await file.getFile();
-      let newFile = { key: crypto.randomUUID(), name: file.name };
-      if (isExcel(file)) {
-        results.push({
-          ...newFile,
-          content: await getTextFromExcelFile(fileContent),
-        });
-      } else if (isZip(file)) {
-        const zipReader = new ZipReader(new BlobReader(fileContent));
-
-        for (const entry of await zipReader.getEntries()) {
-          if (entry.directory) continue;
-          if (shouldIgnoreFile(entry.filename)) continue;
-
-          const fileContent = await entry.getData?.(new BlobWriter());
-          if (fileContent) {
-            const fileText = await new Response(fileContent).text();
-            results.push({
-              key: crypto.randomUUID(),
-              name: entry.filename,
-              content: fileText,
-            });
-          }
+    try {
+      if (entry.kind === "file") {
+        const file = entry as FileDropItem;
+        if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+          return results;
         }
 
-        await zipReader.close();
-      } else {
-        results.push({
-          key: crypto.randomUUID(),
-          name: file.name,
-          content: await file.getText(),
-        });
+        const fileContent = await file.getFile();
+        let newFile = { key: crypto.randomUUID(), name: file.name };
+
+        if (isExcel(file)) {
+          // File size validation is handled inside getTextFromExcelFile
+          results.push({
+            ...newFile,
+            content: await getTextFromExcelFile(fileContent),
+          });
+        } else if (isZip(file)) {
+          // Validate ZIP file size
+          validateFileSize(fileContent, MAX_ZIP_FILE_SIZE);
+
+          const zipReader = new ZipReader(new BlobReader(fileContent));
+
+          for (const entry of await zipReader.getEntries()) {
+            if (entry.directory) continue;
+            if (shouldIgnoreFile(entry.filename)) continue;
+
+            const entryFileContent = await entry.getData?.(new BlobWriter());
+            if (entryFileContent) {
+              // Validate individual file size within ZIP
+              validateFileSize(
+                { size: entryFileContent.size, name: entry.filename },
+                MAX_REGULAR_FILE_SIZE
+              );
+
+              const fileText = await new Response(entryFileContent).text();
+              results.push({
+                key: crypto.randomUUID(),
+                name: entry.filename,
+                content: fileText,
+              });
+            }
+          }
+
+          await zipReader.close();
+        } else {
+          // Validate regular file size
+          validateFileSize(fileContent, MAX_REGULAR_FILE_SIZE);
+
+          results.push({
+            key: crypto.randomUUID(),
+            name: file.name,
+            content: await file.getText(),
+          });
+        }
+      } else if (entry.kind === "directory") {
+        const directory = entry as DirectoryDropItem;
+        for await (const nestedEntry of directory.getEntries()) {
+          const nestedResults = await processFileAsync(nestedEntry);
+          results.push(...nestedResults);
+        }
       }
-    } else if (entry.kind === "directory") {
-      const directory = entry as DirectoryDropItem;
-      for await (const nestedEntry of directory.getEntries()) {
-        const nestedResults = await processFileAsync(nestedEntry);
-        results.push(...nestedResults);
-      }
+      return results;
+    } catch (error) {
+      // Log error for debugging but don't include file in results
+      console.error(
+        `Error processing file: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+      toast.error(
+        `Error processing file: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+      return results; // Return empty results for failed files
     }
-    return results;
   };
 
   const handleDrop = async (e: DropEvent) => {
@@ -304,11 +353,28 @@ export default function Home() {
       const newFiles: TextFile[] = [];
 
       const processFile = async (file: File) => {
-        if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
-          return;
+        try {
+          if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+            return;
+          }
+
+          // Validate file size
+          validateFileSize(file, MAX_REGULAR_FILE_SIZE);
+
+          const content = await file.text();
+          newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
+        } catch (error) {
+          console.error(
+            `Error processing file "${file.name}": ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          );
+          toast.error(
+            `Error processing file "${file.name}": ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          );
         }
-        const content = await file.text();
-        newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
       };
 
       const processDirectory = async (entry: FileSystemDirectoryEntry) => {
