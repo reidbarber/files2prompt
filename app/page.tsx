@@ -248,6 +248,9 @@ export default function Home() {
   let [files, setFiles] = useState<TextFile[]>([]);
   let [isProcessing, setIsProcessing] = useState(false);
   let [selectedOption, setSelectedOption] = useState(options[0].id);
+
+  // AbortController for cancelling async operations
+  const abortControllerRef = useRef<AbortController | null>(null);
   let [selectedMarkdownOption, setSelectedMarkdownOption] = useState(
     markdownOptions[0].id
   );
@@ -302,6 +305,17 @@ export default function Home() {
     }
   }, [autoCopy, files.length, formattedOutput, copyOutoutToClipboard]);
 
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      // Cancel any ongoing operations when component unmounts
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
+
   const processFileAsync = useCallback(
     async (entry: FileDropItem | DirectoryDropItem): Promise<TextFile[]> => {
       const results: TextFile[] = [];
@@ -328,28 +342,39 @@ export default function Home() {
 
             const zipReader = new ZipReader(new BlobReader(fileContent));
 
-            for (const entry of await zipReader.getEntries()) {
-              if (entry.directory) continue;
-              if (shouldIgnoreFile(entry.filename)) continue;
+            try {
+              const entries = await zipReader.getEntries();
 
-              const entryFileContent = await entry.getData?.(new BlobWriter());
-              if (entryFileContent) {
-                // Validate individual file size within ZIP
-                validateFileSize(
-                  { size: entryFileContent.size, name: entry.filename },
-                  MAX_REGULAR_FILE_SIZE
+              for (const entry of entries) {
+                if (entry.directory) continue;
+                if (shouldIgnoreFile(entry.filename)) continue;
+
+                const entryFileContent = await entry.getData?.(
+                  new BlobWriter()
                 );
+                if (entryFileContent) {
+                  // Validate individual file size within ZIP
+                  validateFileSize(
+                    { size: entryFileContent.size, name: entry.filename },
+                    MAX_REGULAR_FILE_SIZE
+                  );
 
-                const fileText = await new Response(entryFileContent).text();
-                results.push({
-                  key: crypto.randomUUID(),
-                  name: entry.filename,
-                  content: fileText,
-                });
+                  const fileText = await new Response(entryFileContent).text();
+                  results.push({
+                    key: crypto.randomUUID(),
+                    name: entry.filename,
+                    content: fileText,
+                  });
+                }
+              }
+            } finally {
+              // Ensure ZIP reader is always closed, even if an error occurs
+              try {
+                await zipReader.close();
+              } catch (closeError) {
+                console.error("Error closing ZIP reader:", closeError);
               }
             }
-
-            await zipReader.close();
           } else {
             // Validate regular file size
             validateFileSize(fileContent, MAX_REGULAR_FILE_SIZE);
@@ -388,9 +413,22 @@ export default function Home() {
 
   const handleDrop = useCallback(
     async (e: DropEvent) => {
+      // Cancel any previous operation
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new AbortController for this operation
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
       setIsProcessing(true);
 
       try {
+        // Check if operation was cancelled before starting
+        if (signal.aborted) {
+          return;
+        }
         const processingPromises: Promise<TextFile[]>[] = [];
 
         for (const item of e.items) {
@@ -412,13 +450,32 @@ export default function Home() {
         }
 
         const results = await Promise.all(processingPromises);
+
+        // Check if operation was cancelled after processing
+        if (signal.aborted) {
+          return;
+        }
+
         const newFiles = results.flat();
 
         setFiles((prevFiles) =>
           replaceOnDrop ? newFiles : [...prevFiles, ...newFiles]
         );
+      } catch (error) {
+        // Handle AbortError specifically
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("File drop operation was cancelled");
+          toast.info("File processing was cancelled");
+          return;
+        }
+        // Re-throw other errors
+        throw error;
       } finally {
         setIsProcessing(false);
+        // Clear the abort controller reference when done
+        if (abortControllerRef.current?.signal === signal) {
+          abortControllerRef.current = null;
+        }
       }
     },
     [processFileAsync, replaceOnDrop]
@@ -428,9 +485,22 @@ export default function Home() {
     async (fileList: FileList | null) => {
       if (!fileList) return;
 
+      // Cancel any previous operation
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new AbortController for this operation
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
       setIsProcessing(true);
 
       try {
+        // Check if operation was cancelled before starting
+        if (signal.aborted) {
+          return;
+        }
         const newFiles: TextFile[] = [];
 
         const processFile = async (file: File) => {
@@ -464,9 +534,22 @@ export default function Home() {
 
         const processDirectory = async (entry: FileSystemDirectoryEntry) => {
           const reader = entry.createReader();
-          const entries = await new Promise<FileSystemEntry[]>((resolve) => {
-            reader.readEntries((entries) => resolve(entries));
-          });
+
+          // Add timeout to prevent hanging operations
+          const entries = await Promise.race([
+            new Promise<FileSystemEntry[]>((resolve, reject) => {
+              reader.readEntries(
+                (entries) => resolve(entries),
+                (error) => reject(error)
+              );
+            }),
+            new Promise<never>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Directory read timeout")),
+                30000
+              )
+            ),
+          ]);
 
           const processingPromises: Promise<void>[] = [];
 
@@ -507,9 +590,28 @@ export default function Home() {
         }
 
         await Promise.all(processingPromises);
+
+        // Check if operation was cancelled after processing
+        if (signal.aborted) {
+          return;
+        }
+
         setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+      } catch (error) {
+        // Handle AbortError specifically
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("File selection operation was cancelled");
+          toast.info("File processing was cancelled");
+          return;
+        }
+        // Re-throw other errors
+        throw error;
       } finally {
         setIsProcessing(false);
+        // Clear the abort controller reference when done
+        if (abortControllerRef.current?.signal === signal) {
+          abortControllerRef.current = null;
+        }
       }
     },
     [ignoreSystemFiles]
