@@ -37,7 +37,7 @@ export function Dialog({
     <DialogWrapper {...props}>
       {({ close }) => (
         <>
-          <div className="flex justify-between gap-2">
+          <div className="flex justify-center items-center gap-2 relative">
             <Heading
               slot="title"
               className="text-xl font-semibold leading-6 my-0"
@@ -47,7 +47,7 @@ export function Dialog({
             <RACButton
               aria-label="Close settings"
               onPress={close}
-              className="rounded-full p-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-2 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
+              className="absolute right-0 rounded-full p-1 cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-2 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
