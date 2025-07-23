@@ -6,6 +6,7 @@ interface SettingsSwitchProps {
   onChange: (isSelected: boolean) => void;
 }
 
+// Inspired by https://buildui.com/recipes/ios-animated-switch
 export function SettingsSwitch({
   label,
   isSelected,
