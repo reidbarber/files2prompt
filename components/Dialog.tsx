@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react";
-import { chain } from "react-aria";
 import {
   DialogProps,
   Heading,
@@ -60,7 +59,9 @@ export function Dialog({
               </svg>
             </RACButton>
           </div>
-          <div className="mt-3 text-slate-500 dark:text-zinc-400">{children}</div>
+          <div className="mt-3 text-slate-500 dark:text-zinc-400">
+            {children}
+          </div>
         </>
       )}
     </DialogWrapper>

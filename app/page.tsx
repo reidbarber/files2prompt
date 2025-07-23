@@ -831,7 +831,6 @@ export default function Home() {
                             </li>
                           </ul>
                         </div>
-                        <SignUpFormReact />
                         <p className="text-center pt-8">
                           Made by{" "}
                           <a
