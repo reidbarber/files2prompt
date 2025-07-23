@@ -54,6 +54,7 @@ export const GridListItem = React.memo(function GridListItem({
           {allowsDragging && (
             <Button
               slot="drag"
+              aria-label="Drag to reorder file"
               className="rounded-full cursor-default dark:text-slate-100 dark:hover:text-slate-300 text-slate-600 hover:text-slate-800 outline-none focus-visible:ring-2 ring-offset-1 ring-offset-white ring-slate-800 dark:ring-white dark:ring-offset-black transition duration-200 ease-in-out"
             >
               ≡
