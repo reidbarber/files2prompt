@@ -876,7 +876,7 @@ export default function Home() {
               !isListDragging.current &&
               !isProcessing &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
-                <div className="absolute inset-0 z-10 rounded-lg h-dvh flex items-center justify-center">
+                <div className="absolute inset-0 z-20 rounded-lg h-dvh flex items-center justify-center backdrop-blur-sm bg-white/30 dark:bg-black/30">
                   <Text className="font-semibold text-5xl text-black dark:text-white drop-shadow-2xl">
                     Drop to add
                   </Text>
