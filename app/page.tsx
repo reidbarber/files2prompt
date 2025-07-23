@@ -1082,7 +1082,7 @@ export default function Home() {
                             prevFiles.filter((file) => file.key !== item.key)
                           )
                         }
-                        className="border-none justify-center"
+                        className="border-none"
                       >
                         {item.name}
                         <DialogTrigger>
@@ -1139,7 +1139,7 @@ export default function Home() {
                           aria-label="Files to replace"
                         >
                           {(item) => (
-                            <GridListItem className="border-none justify-center">
+                            <GridListItem className="border-none">
                               {item.name}
                             </GridListItem>
                           )}
