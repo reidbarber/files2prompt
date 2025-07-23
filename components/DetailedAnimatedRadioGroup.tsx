@@ -19,7 +19,7 @@ interface AnimatedRadioGroupProps {
 
 const styles = tv({
   extend: focusRing,
-  base: "relative flex flex-col gap-4 p-4 rounded-lg border-2 bg-white dark:bg-zinc-800 transition-all h-full",
+  base: "relative flex flex-col gap-4 p-4 rounded-xl border-2 bg-white dark:bg-zinc-800 transition-all h-full",
   variants: {
     isSelected: {
       false:

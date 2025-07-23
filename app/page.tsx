@@ -7,7 +7,6 @@ import { Dialog } from "@/components/Dialog";
 import { GridList, GridListItem } from "@/components/GridList";
 import { Modal } from "@/components/Modal";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
-import SignUpFormReact from "@/components/SignupForm";
 import { formatMarkdown, formatXML } from "@/utils/outputUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropEvent } from "react-aria";
@@ -69,10 +68,75 @@ const xmlOptions = [
   },
 ];
 
-// const acceptedFileTypes = [
-//   "text/*",
-//   "application/json,.py,.ts,.js,.html,.css,.xml,.md,.yaml,.",
-// ];
+const acceptedFileTypes = [
+  "text/*",
+  "application/json",
+  "application/javascript",
+  "application/typescript",
+  "application/xml",
+  "application/x-yaml",
+  "application/yaml",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/zip",
+  // Common text file extensions
+  ".txt",
+  ".md",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".json",
+  ".xml",
+  ".html",
+  ".htm",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".py",
+  ".java",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
+  ".cs",
+  ".php",
+  ".rb",
+  ".go",
+  ".rs",
+  ".swift",
+  ".kt",
+  ".scala",
+  ".sh",
+  ".bash",
+  ".zsh",
+  ".fish",
+  ".ps1",
+  ".bat",
+  ".cmd",
+  ".sql",
+  ".r",
+  ".m",
+  ".pl",
+  ".lua",
+  ".vim",
+  ".dockerfile",
+  ".gitignore",
+  ".env",
+  ".ini",
+  ".cfg",
+  ".conf",
+  ".config",
+  ".toml",
+  ".yaml",
+  ".yml",
+  ".log",
+  ".csv",
+  ".tsv",
+  ".rtf",
+  ".swift",
+];
 
 // Maximum file sizes
 const MAX_REGULAR_FILE_SIZE = 5 * 1024 * 1024; // 5MB for regular text files
@@ -83,6 +147,106 @@ let isExcel = (file: { type: string }) =>
   file.type ===
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 let isZip = (file: { type: string }) => file.type === "application/zip";
+
+// Define accepted file types
+const ACCEPTED_TEXT_TYPES = [
+  "text/",
+  "application/json",
+  "application/javascript",
+  "application/typescript",
+  "application/xml",
+  "application/x-yaml",
+  "application/yaml",
+];
+
+const ACCEPTED_FILE_EXTENSIONS = [
+  ".txt",
+  ".md",
+  ".markdown",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".json",
+  ".xml",
+  ".html",
+  ".htm",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".py",
+  ".java",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
+  ".cs",
+  ".php",
+  ".rb",
+  ".go",
+  ".rs",
+  ".swift",
+  ".kt",
+  ".scala",
+  ".sh",
+  ".bash",
+  ".zsh",
+  ".fish",
+  ".ps1",
+  ".bat",
+  ".cmd",
+  ".sql",
+  ".r",
+  ".m",
+  ".pl",
+  ".lua",
+  ".vim",
+  ".dockerfile",
+  ".gitignore",
+  ".env",
+  ".ini",
+  ".cfg",
+  ".conf",
+  ".config",
+  ".toml",
+  ".yaml",
+  ".yml",
+  ".log",
+  ".csv",
+  ".tsv",
+  ".rtf",
+  ".tex",
+  ".latex",
+  ".bib",
+  ".org",
+  ".rst",
+  ".adoc",
+];
+
+const isTextFile = (file: { type: string; name: string }): boolean => {
+  // Check MIME type
+  if (ACCEPTED_TEXT_TYPES.some((type) => file.type.startsWith(type))) {
+    return true;
+  }
+
+  // Check file extension
+  const fileName = file.name.toLowerCase();
+  if (ACCEPTED_FILE_EXTENSIONS.some((ext) => fileName.endsWith(ext))) {
+    return true;
+  }
+
+  // Special case for files without extensions that are likely text
+  if (!file.type && !fileName.includes(".")) {
+    return true; // Files like "README", "LICENSE", etc.
+  }
+
+  return false;
+};
+
+const isSupportedFileType = (file: { type: string; name: string }): boolean => {
+  return isTextFile(file) || isExcel(file) || isZip(file);
+};
 
 const validateFileSize = (
   file: { size: number; name: string },
@@ -163,6 +327,81 @@ const shouldIgnoreFile = (filename: string): boolean => {
 
 let formatter = new NumberFormatter("en-US");
 
+const useDebounceTokenCount = (
+  formattedOutput: string,
+  encoding: any,
+  delay: number = 500
+) => {
+  const [tokenCount, setTokenCount] = useState(0);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  useEffect(() => {
+    if (!formattedOutput) {
+      setTokenCount(0);
+      return;
+    }
+
+    setIsCalculating(true);
+    const timeoutId = setTimeout(() => {
+      try {
+        const count = encoding.encode(formattedOutput).length;
+        setTokenCount(count);
+      } catch (error) {
+        console.error("Error calculating token count:", error);
+        setTokenCount(0);
+      } finally {
+        setIsCalculating(false);
+      }
+    }, delay);
+
+    return () => {
+      clearTimeout(timeoutId);
+      setIsCalculating(false);
+    };
+  }, [formattedOutput, encoding, delay]);
+
+  return { tokenCount, isCalculating };
+};
+
+const convertFilesToString = (
+  files: TextFile[],
+  selectedOption: string,
+  selectedMarkdownOption: string,
+  selectedXmlOption: string
+): string => {
+  if (files.length === 0) return "";
+
+  switch (selectedOption) {
+    case "markdown":
+      return formatMarkdown(files, selectedMarkdownOption);
+    case "xml":
+      return formatXML(files, selectedXmlOption);
+    default:
+      return "";
+  }
+};
+
+const reorderFiles = (
+  files: TextFile[],
+  keys: Set<any>,
+  target: any,
+  position: "before" | "after"
+): TextFile[] => {
+  const newFiles = [...files];
+  const targetIndex = newFiles.findIndex((file) => file.key === target.key);
+
+  for (const key of keys) {
+    const item = newFiles.find((file) => file.key === key);
+    if (item !== undefined) {
+      newFiles.splice(newFiles.indexOf(item), 1);
+      const insertIndex = position === "before" ? targetIndex : targetIndex + 1;
+      newFiles.splice(insertIndex, 0, item);
+    }
+  }
+
+  return newFiles;
+};
+
 export interface TextFile {
   key: Key;
   name: string;
@@ -173,6 +412,9 @@ export default function Home() {
   let [files, setFiles] = useState<TextFile[]>([]);
   let [isProcessing, setIsProcessing] = useState(false);
   let [selectedOption, setSelectedOption] = useState(options[0].id);
+
+  // AbortController for cancelling async operations
+  const abortControllerRef = useRef<AbortController | null>(null);
   let [selectedMarkdownOption, setSelectedMarkdownOption] = useState(
     markdownOptions[0].id
   );
@@ -182,25 +424,18 @@ export default function Home() {
   let [ignoreSystemFiles, setIgnoreSystemFiles] = useState(true);
   const encoding = useMemo(() => getEncoding("cl100k_base"), []);
 
-  let formattedOutput = useMemo(() => {
-    const convertFilesToString = () => {
-      if (files.length === 0) return "";
-
-      switch (selectedOption) {
-        case "markdown":
-          return formatMarkdown(files, selectedMarkdownOption);
-        case "xml":
-          return formatXML(files, selectedXmlOption);
-        default:
-          return "";
-      }
-    };
-    return convertFilesToString();
+  const formattedOutput = useMemo(() => {
+    return convertFilesToString(
+      files,
+      selectedOption,
+      selectedMarkdownOption,
+      selectedXmlOption
+    );
   }, [files, selectedMarkdownOption, selectedOption, selectedXmlOption]);
 
-  const tokenCount = useMemo(
-    () => encoding.encode(formattedOutput).length,
-    [encoding, formattedOutput]
+  const { tokenCount, isCalculating } = useDebounceTokenCount(
+    formattedOutput,
+    encoding
   );
 
   const selectedOptionLabel = useMemo(
@@ -208,7 +443,7 @@ export default function Home() {
     [selectedOption]
   );
 
-  let copyOutoutToClipboard = useCallback(async () => {
+  const copyOutoutToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(formattedOutput);
 
@@ -220,213 +455,374 @@ export default function Home() {
     }
   }, [formattedOutput, files.length, selectedOptionLabel]);
 
+  // Track the last formatted output to prevent excessive auto-copy triggers
+  const lastFormattedOutputRef = useRef("");
+
   useEffect(() => {
-    if (autoCopy && files.length > 0) {
+    if (
+      autoCopy &&
+      files.length > 0 &&
+      formattedOutput !== lastFormattedOutputRef.current
+    ) {
+      lastFormattedOutputRef.current = formattedOutput;
       copyOutoutToClipboard();
     }
-  }, [autoCopy, copyOutoutToClipboard, files.length, formattedOutput]);
+  }, [autoCopy, files.length, formattedOutput, copyOutoutToClipboard]);
 
-  const processFileAsync = async (
-    entry: FileDropItem | DirectoryDropItem
-  ): Promise<TextFile[]> => {
-    const results: TextFile[] = [];
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      // Cancel any ongoing operations when component unmounts
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
 
-    try {
-      if (entry.kind === "file") {
-        const file = entry as FileDropItem;
-        if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
-          return results;
+  const processFileAsync = useCallback(
+    async (entry: FileDropItem | DirectoryDropItem): Promise<TextFile[]> => {
+      const results: TextFile[] = [];
+
+      try {
+        if (entry.kind === "file") {
+          const file = entry as FileDropItem;
+          if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+            return results;
+          }
+
+          // Check if file type is supported
+          if (!isSupportedFileType(file)) {
+            // toast.warning(`Skipped unsupported file: ${file.name}`);
+            return results;
+          }
+
+          const fileContent = await file.getFile();
+          let newFile = { key: crypto.randomUUID(), name: file.name };
+
+          if (isExcel(file)) {
+            // File size validation is handled inside getTextFromExcelFile
+            results.push({
+              ...newFile,
+              content: await getTextFromExcelFile(fileContent),
+            });
+          } else if (isZip(file)) {
+            // Validate ZIP file size
+            validateFileSize(fileContent, MAX_ZIP_FILE_SIZE);
+
+            const zipReader = new ZipReader(new BlobReader(fileContent));
+
+            try {
+              const entries = await zipReader.getEntries();
+
+              for (const entry of entries) {
+                if (entry.directory) continue;
+                if (shouldIgnoreFile(entry.filename)) continue;
+
+                // Check if file within ZIP is a supported text file
+                const mockFile = { type: "", name: entry.filename };
+                if (!isTextFile(mockFile)) {
+                  continue;
+                }
+
+                const entryFileContent = await entry.getData?.(
+                  new BlobWriter()
+                );
+                if (entryFileContent) {
+                  // Validate individual file size within ZIP
+                  validateFileSize(
+                    { size: entryFileContent.size, name: entry.filename },
+                    MAX_REGULAR_FILE_SIZE
+                  );
+
+                  const fileText = await new Response(entryFileContent).text();
+                  results.push({
+                    key: crypto.randomUUID(),
+                    name: entry.filename,
+                    content: fileText,
+                  });
+                }
+              }
+            } finally {
+              // Ensure ZIP reader is always closed, even if an error occurs
+              try {
+                await zipReader.close();
+              } catch (closeError) {
+                console.error("Error closing ZIP reader:", closeError);
+              }
+            }
+          } else if (isTextFile(file)) {
+            // Handle regular text files
+            validateFileSize(fileContent, MAX_REGULAR_FILE_SIZE);
+
+            results.push({
+              key: crypto.randomUUID(),
+              name: file.name,
+              content: await file.getText(),
+            });
+          } else {
+            // Shouldn't happen due to the earlier check, but just in case
+            console.warn(
+              `Unexpected file type after validation: ${file.name} (${file.type})`
+            );
+          }
+        } else if (entry.kind === "directory") {
+          const directory = entry as DirectoryDropItem;
+          for await (const nestedEntry of directory.getEntries()) {
+            const nestedResults = await processFileAsync(nestedEntry);
+            results.push(...nestedResults);
+          }
+        }
+        return results;
+      } catch (error) {
+        // Log error for debugging but don't include file in results
+        console.error(
+          `Error processing file: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+        toast.error(
+          `Error processing file: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+        return results; // Return empty results for failed files
+      }
+    },
+    [ignoreSystemFiles]
+  );
+
+  const handleDrop = useCallback(
+    async (e: DropEvent) => {
+      // Cancel any previous operation
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new AbortController for this operation
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
+      setIsProcessing(true);
+
+      try {
+        // Check if operation was cancelled before starting
+        if (signal.aborted) {
+          return;
+        }
+        const processingPromises: Promise<TextFile[]>[] = [];
+
+        for (const item of e.items) {
+          if (item.kind === "text") {
+            const textItem = item as TextDropItem;
+            const promise = textItem
+              .getText("application/x-gridlist-key")
+              .then((keyData) => {
+                // If this item has our custom key data, it was dragged from our GridList
+                if (keyData) {
+                  return []; // Return empty array to ignore this drop
+                }
+
+                // Otherwise, process as normal text content
+                return textItem.getText("text/plain").then((content) => [
+                  {
+                    key: crypto.randomUUID(),
+                    name: "untitled.txt",
+                    content,
+                  },
+                ]);
+              })
+              .catch(() => {
+                // If getting the custom key fails, fall back to processing as text
+                return textItem.getText("text/plain").then((content) => [
+                  {
+                    key: crypto.randomUUID(),
+                    name: "untitled.txt",
+                    content,
+                  },
+                ]);
+              });
+            processingPromises.push(promise);
+          } else if (item.kind === "file" || item.kind === "directory") {
+            processingPromises.push(
+              processFileAsync(item as FileDropItem | DirectoryDropItem)
+            );
+          }
         }
 
-        const fileContent = await file.getFile();
-        let newFile = { key: crypto.randomUUID(), name: file.name };
+        const results = await Promise.all(processingPromises);
 
-        if (isExcel(file)) {
-          // File size validation is handled inside getTextFromExcelFile
-          results.push({
-            ...newFile,
-            content: await getTextFromExcelFile(fileContent),
-          });
-        } else if (isZip(file)) {
-          // Validate ZIP file size
-          validateFileSize(fileContent, MAX_ZIP_FILE_SIZE);
+        // Check if operation was cancelled after processing
+        if (signal.aborted) {
+          return;
+        }
 
-          const zipReader = new ZipReader(new BlobReader(fileContent));
+        const newFiles = results.flat();
 
-          for (const entry of await zipReader.getEntries()) {
-            if (entry.directory) continue;
-            if (shouldIgnoreFile(entry.filename)) continue;
+        setFiles((prevFiles) =>
+          replaceOnDrop ? newFiles : [...prevFiles, ...newFiles]
+        );
+      } catch (error) {
+        // Handle AbortError specifically
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("File drop operation was cancelled");
+          toast.info("File processing was cancelled");
+          return;
+        }
+        // Re-throw other errors
+        throw error;
+      } finally {
+        setIsProcessing(false);
+        // Clear the abort controller reference when done
+        if (abortControllerRef.current?.signal === signal) {
+          abortControllerRef.current = null;
+        }
+      }
+    },
+    [processFileAsync, replaceOnDrop]
+  );
 
-            const entryFileContent = await entry.getData?.(new BlobWriter());
-            if (entryFileContent) {
-              // Validate individual file size within ZIP
-              validateFileSize(
-                { size: entryFileContent.size, name: entry.filename },
-                MAX_REGULAR_FILE_SIZE
+  const handleSelect = useCallback(
+    async (fileList: FileList | null) => {
+      if (!fileList) return;
+
+      // Cancel any previous operation
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new AbortController for this operation
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
+      setIsProcessing(true);
+
+      try {
+        // Check if operation was cancelled before starting
+        if (signal.aborted) {
+          return;
+        }
+        const newFiles: TextFile[] = [];
+
+        const processFile = async (file: File) => {
+          try {
+            if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+              return;
+            }
+
+            // Check if file type is supported (only text files for file selector)
+            if (!isTextFile(file)) {
+              // toast.warning(`Skipped unsupported file: ${file.name}`);
+              return;
+            }
+
+            // Validate file size
+            validateFileSize(file, MAX_REGULAR_FILE_SIZE);
+
+            const content = await file.text();
+            newFiles.push({
+              key: crypto.randomUUID(),
+              name: file.name,
+              content,
+            });
+          } catch (error) {
+            console.error(
+              `Error processing file "${file.name}": ${
+                error instanceof Error ? error.message : "Unknown error"
+              }`
+            );
+            toast.error(
+              `Error processing file "${file.name}": ${
+                error instanceof Error ? error.message : "Unknown error"
+              }`
+            );
+          }
+        };
+
+        const processDirectory = async (entry: FileSystemDirectoryEntry) => {
+          const reader = entry.createReader();
+
+          // Add timeout to prevent hanging operations
+          const entries = await Promise.race([
+            new Promise<FileSystemEntry[]>((resolve, reject) => {
+              reader.readEntries(
+                (entries) => resolve(entries),
+                (error) => reject(error)
               );
+            }),
+            new Promise<never>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Directory read timeout")),
+                30000
+              )
+            ),
+          ]);
 
-              const fileText = await new Response(entryFileContent).text();
-              results.push({
-                key: crypto.randomUUID(),
-                name: entry.filename,
-                content: fileText,
-              });
+          const processingPromises: Promise<void>[] = [];
+
+          for (const nestedEntry of entries) {
+            if (nestedEntry.isFile) {
+              const promise = new Promise<File>((resolve) => {
+                (nestedEntry as FileSystemFileEntry).file(resolve);
+              }).then(processFile);
+              processingPromises.push(promise);
+            } else if (nestedEntry.isDirectory) {
+              processingPromises.push(
+                processDirectory(nestedEntry as FileSystemDirectoryEntry)
+              );
             }
           }
 
-          await zipReader.close();
-        } else {
-          // Validate regular file size
-          validateFileSize(fileContent, MAX_REGULAR_FILE_SIZE);
+          await Promise.all(processingPromises);
+        };
 
-          results.push({
-            key: crypto.randomUUID(),
-            name: file.name,
-            content: await file.getText(),
-          });
-        }
-      } else if (entry.kind === "directory") {
-        const directory = entry as DirectoryDropItem;
-        for await (const nestedEntry of directory.getEntries()) {
-          const nestedResults = await processFileAsync(nestedEntry);
-          results.push(...nestedResults);
-        }
-      }
-      return results;
-    } catch (error) {
-      // Log error for debugging but don't include file in results
-      console.error(
-        `Error processing file: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-      toast.error(
-        `Error processing file: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-      return results; // Return empty results for failed files
-    }
-  };
-
-  const handleDrop = async (e: DropEvent) => {
-    setIsProcessing(true);
-
-    try {
-      const processingPromises: Promise<TextFile[]>[] = [];
-
-      for (const item of e.items) {
-        if (item.kind === "text") {
-          const textItem = item as TextDropItem;
-          const promise = textItem.getText("text/plain").then((content) => [
-            {
-              key: crypto.randomUUID(),
-              name: "untitled.txt",
-              content,
-            },
-          ]);
-          processingPromises.push(promise);
-        } else if (item.kind === "file" || item.kind === "directory") {
-          processingPromises.push(
-            processFileAsync(item as FileDropItem | DirectoryDropItem)
-          );
-        }
-      }
-
-      const results = await Promise.all(processingPromises);
-      const newFiles = results.flat();
-
-      setFiles((prevFiles) =>
-        replaceOnDrop ? newFiles : [...prevFiles, ...newFiles]
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSelect = async (fileList: FileList | null) => {
-    if (!fileList) return;
-
-    setIsProcessing(true);
-
-    try {
-      const newFiles: TextFile[] = [];
-
-      const processFile = async (file: File) => {
-        try {
-          if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
-            return;
-          }
-
-          // Validate file size
-          validateFileSize(file, MAX_REGULAR_FILE_SIZE);
-
-          const content = await file.text();
-          newFiles.push({ key: crypto.randomUUID(), name: file.name, content });
-        } catch (error) {
-          console.error(
-            `Error processing file "${file.name}": ${
-              error instanceof Error ? error.message : "Unknown error"
-            }`
-          );
-          toast.error(
-            `Error processing file "${file.name}": ${
-              error instanceof Error ? error.message : "Unknown error"
-            }`
-          );
-        }
-      };
-
-      const processDirectory = async (entry: FileSystemDirectoryEntry) => {
-        const reader = entry.createReader();
-        const entries = await new Promise<FileSystemEntry[]>((resolve) => {
-          reader.readEntries((entries) => resolve(entries));
-        });
-
+        const files = Array.from(fileList);
         const processingPromises: Promise<void>[] = [];
 
-        for (const nestedEntry of entries) {
-          if (nestedEntry.isFile) {
-            const promise = new Promise<File>((resolve) => {
-              (nestedEntry as FileSystemFileEntry).file(resolve);
-            }).then(processFile);
+        for (const file of files) {
+          if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
+            continue;
+          }
+          if (file.webkitRelativePath) {
+            const promise = new Promise<FileSystemDirectoryEntry>((resolve) => {
+              (window as any).webkitResolveLocalFileSystemURL(
+                file.webkitRelativePath,
+                (entry: FileSystemDirectoryEntry) => resolve(entry)
+              );
+            }).then(processDirectory);
             processingPromises.push(promise);
-          } else if (nestedEntry.isDirectory) {
-            processingPromises.push(
-              processDirectory(nestedEntry as FileSystemDirectoryEntry)
-            );
+          } else {
+            processingPromises.push(processFile(file));
           }
         }
 
         await Promise.all(processingPromises);
-      };
 
-      const files = Array.from(fileList);
-      const processingPromises: Promise<void>[] = [];
-
-      for (const file of files) {
-        if (ignoreSystemFiles && shouldIgnoreFile(file.name)) {
-          continue;
+        // Check if operation was cancelled after processing
+        if (signal.aborted) {
+          return;
         }
-        if (file.webkitRelativePath) {
-          const promise = new Promise<FileSystemDirectoryEntry>((resolve) => {
-            (window as any).webkitResolveLocalFileSystemURL(
-              file.webkitRelativePath,
-              (entry: FileSystemDirectoryEntry) => resolve(entry)
-            );
-          }).then(processDirectory);
-          processingPromises.push(promise);
-        } else {
-          processingPromises.push(processFile(file));
+
+        setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+      } catch (error) {
+        // Handle AbortError specifically
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("File selection operation was cancelled");
+          toast.info("File processing was cancelled");
+          return;
+        }
+        // Re-throw other errors
+        throw error;
+      } finally {
+        setIsProcessing(false);
+        // Clear the abort controller reference when done
+        if (abortControllerRef.current?.signal === signal) {
+          abortControllerRef.current = null;
         }
       }
-
-      await Promise.all(processingPromises);
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+    },
+    [ignoreSystemFiles]
+  );
 
   let isListDragging = useRef(false);
 
@@ -440,38 +836,19 @@ export default function Home() {
     getItems: (keys) =>
       files
         .filter((file) => keys.has(file.key))
-        .map((file) => ({ "text/plain": file.name })),
+        .map((file) => ({
+          "text/plain": file.name,
+          "application/x-gridlist-key": String(file.key),
+        })),
     onReorder(e) {
       if (e.target.dropPosition === "before") {
-        setFiles((prevFiles) => {
-          const newFiles = [...prevFiles];
-          const targetIndex = newFiles.findIndex(
-            (file) => file.key === e.target.key
-          );
-          for (const key of e.keys) {
-            const item = newFiles.find((file) => file.key === key);
-            if (item !== undefined) {
-              newFiles.splice(newFiles.indexOf(item), 1);
-              newFiles.splice(targetIndex, 0, item);
-            }
-          }
-          return newFiles;
-        });
+        setFiles((prevFiles) =>
+          reorderFiles(prevFiles, e.keys, e.target, "before")
+        );
       } else if (e.target.dropPosition === "after") {
-        setFiles((prevFiles) => {
-          const newFiles = [...prevFiles];
-          const targetIndex = newFiles.findIndex(
-            (file) => file.key === e.target.key
-          );
-          for (const key of e.keys) {
-            const item = newFiles.find((file) => file.key === key);
-            if (item !== undefined) {
-              newFiles.splice(newFiles.indexOf(item), 1);
-              newFiles.splice(targetIndex + 1, 0, item);
-            }
-          }
-          return newFiles;
-        });
+        setFiles((prevFiles) =>
+          reorderFiles(prevFiles, e.keys, e.target, "after")
+        );
       }
     },
   });
@@ -499,7 +876,7 @@ export default function Home() {
               !isListDragging.current &&
               !isProcessing &&
               ((files.length > 0 && !replaceOnDrop) || files.length === 0) && (
-                <div className="absolute inset-0 z-10 rounded-lg h-dvh flex items-center justify-center">
+                <div className="absolute inset-0 z-20 rounded-lg h-dvh flex items-center justify-center backdrop-blur-sm bg-white/30 dark:bg-black/30">
                   <Text className="font-semibold text-5xl text-black dark:text-white drop-shadow-2xl">
                     Drop to add
                   </Text>
@@ -664,7 +1041,6 @@ export default function Home() {
                             </li>
                           </ul>
                         </div>
-                        <SignUpFormReact />
                         <p className="text-center pt-8">
                           Made by{" "}
                           <a
@@ -706,7 +1082,7 @@ export default function Home() {
                             prevFiles.filter((file) => file.key !== item.key)
                           )
                         }
-                        className="border-none justify-center"
+                        className="border-none"
                       >
                         {item.name}
                         <DialogTrigger>
@@ -763,7 +1139,7 @@ export default function Home() {
                           aria-label="Files to replace"
                         >
                           {(item) => (
-                            <GridListItem className="border-none justify-center">
+                            <GridListItem className="border-none">
                               {item.name}
                             </GridListItem>
                           )}
@@ -777,9 +1153,11 @@ export default function Home() {
                       <Button>Preview</Button>
                       <Modal isDismissable>
                         <Dialog
-                          title={`Output (${formatter.format(
-                            tokenCount
-                          )} tokens)`}
+                          title={`Output (${
+                            isCalculating
+                              ? "calculating..."
+                              : formatter.format(tokenCount)
+                          } tokens)`}
                         >
                           <pre className="overflow-scroll">
                             {formattedOutput}
@@ -788,7 +1166,7 @@ export default function Home() {
                       </Modal>
                     </DialogTrigger>
                     <FileTrigger
-                      // acceptedFileTypes={acceptedFileTypes}
+                      acceptedFileTypes={acceptedFileTypes}
                       allowsMultiple
                       onSelect={isProcessing ? undefined : handleSelect}
                     >
@@ -807,7 +1185,7 @@ export default function Home() {
                   <div>or</div>
                   <div className="text-center">
                     <FileTrigger
-                      // acceptedFileTypes={acceptedFileTypes}
+                      acceptedFileTypes={acceptedFileTypes}
                       allowsMultiple
                       onSelect={isProcessing ? undefined : handleSelect}
                     >

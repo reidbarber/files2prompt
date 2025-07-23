@@ -17,6 +17,7 @@ interface AnimatedRadioGroupProps {
   label?: string;
 }
 
+// Inspired by https://react-spectrum.adobe.com/react-aria/examples/swipeable-tabs.html
 export const AnimatedRadioGroup = React.memo(function AnimatedRadioGroup({
   options,
   selectedOption,

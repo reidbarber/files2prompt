@@ -48,7 +48,7 @@ export default function RootLayout({
         <meta property="og:url" content="https://files2prompt.com" />
         <meta property="og:image" content="/og-image.png" />
       </Head>
-      <body className={inter.className}>
+      <body className={inter.className + " overflow-hidden"}>
         {children}
         <Toaster
           toastOptions={{
