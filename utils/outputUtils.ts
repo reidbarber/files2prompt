@@ -1,4 +1,4 @@
-import { TextFile } from "@/app/page";
+import { TextFile } from "@/hooks/useFileProcessor";
 
 const escapeXml = (unsafe: string): string => {
   if (typeof unsafe !== "string") {
