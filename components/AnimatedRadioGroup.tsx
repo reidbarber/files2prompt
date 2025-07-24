@@ -1,5 +1,4 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { Radio, RadioGroup } from "react-aria-components";
 import { composeTailwindRenderProps } from "./utils";
 
@@ -25,20 +24,59 @@ export const AnimatedRadioGroup = React.memo(function AnimatedRadioGroup({
   className,
   label,
 }: AnimatedRadioGroupProps) {
+  const groupRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef(new Map<string, HTMLElement>());
+  const [bubbleStyles, setBubbleStyles] = useState<React.CSSProperties>();
+
+  const updateBubble = React.useCallback(() => {
+    const container = groupRef.current;
+    const option = optionRefs.current.get(selectedOption);
+    if (container && option) {
+      const containerRect = container.getBoundingClientRect();
+      const rect = option.getBoundingClientRect();
+      setBubbleStyles({
+        transform: `translate(${rect.left - containerRect.left}px, ${
+          rect.top - containerRect.top
+        }px)`,
+        width: rect.width,
+        height: rect.height,
+      });
+    }
+  }, [selectedOption]);
+
+  useLayoutEffect(() => {
+    updateBubble();
+    window.addEventListener("resize", updateBubble);
+    return () => window.removeEventListener("resize", updateBubble);
+  }, [updateBubble]);
+
   return (
     <RadioGroup
+      ref={groupRef}
       className={composeTailwindRenderProps(
         className,
-        "flex gap-2 mx-auto w-max"
+        "relative flex gap-2 mx-auto w-max"
       )}
       aria-label={label || "Options"}
       value={selectedOption}
       onChange={setSelectedOption}
     >
+      <span
+        className="absolute z-10 bg-white mix-blend-difference pointer-events-none"
+        style={{
+          borderRadius: 9999,
+          transition:
+            "transform 0.6s cubic-bezier(0.22,1,0.36,1), width 0.6s, height 0.6s",
+          ...bubbleStyles,
+        }}
+      />
       {options.map((option) => (
         <Radio
           key={option.id}
           value={option.id}
+          ref={(el: HTMLElement | null) => {
+            if (el) optionRefs.current.set(option.id, el);
+          }}
           className={`${
             selectedOption === option.id
               ? ""
@@ -48,14 +86,6 @@ export const AnimatedRadioGroup = React.memo(function AnimatedRadioGroup({
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          {selectedOption === option.id && (
-            <motion.span
-              layoutId="bubble"
-              className="absolute inset-0 z-10 bg-white mix-blend-difference"
-              style={{ borderRadius: 9999 }}
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-            />
-          )}
           {option.label}
         </Radio>
       ))}
