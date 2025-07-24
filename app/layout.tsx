@@ -3,14 +3,36 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
-import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://files2prompt.com"),
   title: "Files2Prompt - Convert files to LLM prompts",
   description:
     "Convert files (like source code) to formatted LLM prompts (like markdown). Copy the generated prompt to your clipboard automatically.",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  openGraph: {
+    title: "Files2Prompt",
+    description: "Convert code or text files to prompts",
+    type: "website",
+    url: "https://files2prompt.com",
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "Files2Prompt",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -20,34 +42,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta property="og:title" content="Files2Prompt" />
-        <meta
-          property="og:description"
-          content="Convert code or text files to prompts"
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://files2prompt.com" />
-        <meta property="og:image" content="/og-image.png" />
-      </Head>
       <body className={inter.className + " overflow-hidden"}>
         {children}
         <Toaster
