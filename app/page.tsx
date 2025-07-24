@@ -135,7 +135,6 @@ const acceptedFileTypes = [
   ".csv",
   ".tsv",
   ".rtf",
-  ".swift",
 ];
 
 // Maximum file sizes
