@@ -35,6 +35,14 @@ export const FileDropZone = React.memo(function FileDropZone({
       aria-label="Drop files here or click to select files."
       className="flex flex-col justify-center items-center gap-10 h-full group"
       onDrop={onDrop}
+      getDropOperation={(types) => {
+        // Can't drop items already in the list
+        if (types.has("application/x-gridlist-key")) {
+          return "cancel";
+        }
+
+        return "copy";
+      }}
     >
       {({ isDropTarget }) => (
         <div className="p-4 sm:p-8 rounded-lg flex flex-col h-full">
