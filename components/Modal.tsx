@@ -7,7 +7,7 @@ import {
 import { tv } from "tailwind-variants";
 
 const overlayStyles = tv({
-  base: "fixed top-0 left-0 w-full h-[--visual-viewport-height] isolate z-20 bg-black/[15%] flex items-center justify-center p-4 text-center backdrop-blur-lg",
+  base: "fixed top-0 left-0 w-full h-[--visual-viewport-height] isolate z-20 bg-black/[15%] flex items-center justify-center p-4 text-center backdrop-blur-lg h-full",
   variants: {
     isEntering: {
       true: "animate-in fade-in duration-200 ease-out",
