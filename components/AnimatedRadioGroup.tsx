@@ -81,7 +81,7 @@ export const AnimatedRadioGroup = React.memo(function AnimatedRadioGroup({
             selectedOption === option.id
               ? ""
               : "hover:text-slate-900 dark:hover:text-slate-100"
-          } relative rounded-full px-3 py-1.5 w-24 text-center text-sm font-medium text-slate-800 dark:text-white ring-slate-800 dark:ring-white dark:ring-offset-black transition focus-visible:ring-2 ring-offset-2`}
+          } relative rounded-full px-3 py-1.5 w-24 text-center text-sm font-medium text-slate-800 dark:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900`}
           style={{
             WebkitTapHighlightColor: "transparent",
           }}
