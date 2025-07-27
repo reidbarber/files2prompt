@@ -33,11 +33,15 @@ export const formatMarkdown = (
   switch (selectedOption) {
     case "markdown1":
       return files
-        .map(({ name, content }) => `## ${name}\n\n\`\`\`\n${content}\n\`\`\``)
+        .map(({ name, content }) =>
+          name ? `## ${name}\n\n\`\`\`\n${content}\n\`\`\`` : content
+        )
         .join("\n\n");
     case "markdown2":
       return files
-        .map(({ name, content }) => `## ${name}\n\n${content}`)
+        .map(({ name, content }) =>
+          name ? `## ${name}\n\n${content}` : content
+        )
         .join("\n\n");
     default:
       return "";
@@ -55,18 +59,20 @@ export const formatXML = (
   switch (selectedOption) {
     case "xml1":
       return `${files
-        .map(
-          ({ name, content }) =>
-            `<file name="${escapeXml(name)}">\n${escapeXml(content)}\n</file>`
+        .map(({ name, content }) =>
+          name
+            ? `<file name="${escapeXml(name)}">\n${escapeXml(content)}\n</file>`
+            : escapeXml(content)
         )
         .join("\n")}\n`;
     case "xml2":
       return `<files>\n${files
-        .map(
-          ({ name, content }) =>
-            `<file>\n  <name>${escapeXml(name)}</name>\n  <content>${escapeXml(
-              content
-            )}</content>\n</file>`
+        .map(({ name, content }) =>
+          name
+            ? `<file>\n  <n>${escapeXml(name)}</n>\n  <content>${escapeXml(
+                content
+              )}</content>\n</file>`
+            : `<file>\n  <content>${escapeXml(content)}</content>\n</file>`
         )
         .join("\n")}\n</files>`;
     default:

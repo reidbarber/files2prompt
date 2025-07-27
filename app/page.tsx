@@ -61,6 +61,21 @@ export default function Home() {
     [handleSelect]
   );
 
+  const handleManualEntry = useCallback(
+    (name: string | undefined, content: string, addToTop: boolean) => {
+      const newFile: TextFile = {
+        key: crypto.randomUUID(),
+        name,
+        content,
+      };
+
+      setFiles((prevFiles) =>
+        addToTop ? [newFile, ...prevFiles] : [...prevFiles, newFile]
+      );
+    },
+    []
+  );
+
   const handleRemoveFile = useCallback(
     (fileKey: any) => {
       setFiles((prevFiles) => removeFile(prevFiles, fileKey));
@@ -139,6 +154,7 @@ export default function Home() {
               onClearFiles={handleClearFiles}
               onCopyToClipboard={copyToClipboard}
               onSelectFiles={handleSelectFiles}
+              onManualEntry={handleManualEntry}
             />
           </div>
         }

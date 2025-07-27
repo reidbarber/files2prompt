@@ -3,15 +3,10 @@ import { GridList, GridListItem } from "@/components/GridList";
 import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
 import { Modal } from "@/components/Modal";
-import {
-  FileTrigger,
-  Button as RACButton,
-  DialogTrigger,
-  Key,
-} from "react-aria-components";
+import { AddFileMenu } from "@/components/AddFileMenu";
+import { Button as RACButton, DialogTrigger, Key } from "react-aria-components";
 import { NumberFormatter } from "@internationalized/number";
 import { TextFile } from "@/hooks/useFileProcessor";
-import { acceptedFileTypes } from "@/utils/fileConstants";
 
 interface FileListComponentProps {
   files: TextFile[];
@@ -25,9 +20,30 @@ interface FileListComponentProps {
   onClearFiles: () => void;
   onCopyToClipboard: () => void;
   onSelectFiles: (fileList: FileList | null) => Promise<void>;
+  onManualEntry: (
+    name: string | undefined,
+    content: string,
+    addToTop: boolean
+  ) => void;
 }
 
 const formatter = new NumberFormatter("en-US");
+
+const getDisplayName = (file: TextFile): string => {
+  if (file.name) {
+    return file.name;
+  }
+  // Show first 50 characters of content with ellipsis if no name
+  const preview = file.content.replace(/\s+/g, " ").trim();
+  return preview.length > 50 ? preview.substring(0, 50) + "..." : preview;
+};
+
+const getDialogTitle = (file: TextFile, tokenCount: number): string => {
+  if (file.name) {
+    return `${file.name} (${formatter.format(tokenCount)} tokens)`;
+  }
+  return `Text Entry (${formatter.format(tokenCount)} tokens)`;
+};
 
 export const FileListComponent = React.memo(function FileListComponent({
   files,
@@ -41,6 +57,7 @@ export const FileListComponent = React.memo(function FileListComponent({
   onClearFiles,
   onCopyToClipboard,
   onSelectFiles,
+  onManualEntry,
 }: FileListComponentProps) {
   if (files.length === 0) {
     return null;
@@ -56,11 +73,11 @@ export const FileListComponent = React.memo(function FileListComponent({
       >
         {(item) => (
           <GridListItem
-            textValue={item.name}
+            textValue={getDisplayName(item)}
             onRemove={() => onRemoveFile(item.key)}
             className="border-none"
           >
-            {item.name}
+            {getDisplayName(item)}
             <DialogTrigger>
               <RACButton
                 aria-label="Preview file"
@@ -88,9 +105,10 @@ export const FileListComponent = React.memo(function FileListComponent({
               </RACButton>
               <Modal isDismissable>
                 <Dialog
-                  title={`${item.name} (${formatter.format(
+                  title={getDialogTitle(
+                    item,
                     encoding.encode(item.content).length
-                  )} tokens)`}
+                  )}
                 >
                   <pre className="overflow-scroll">{item.content}</pre>
                 </Dialog>
@@ -115,13 +133,11 @@ export const FileListComponent = React.memo(function FileListComponent({
             </Dialog>
           </Modal>
         </DialogTrigger>
-        <FileTrigger
-          acceptedFileTypes={acceptedFileTypes}
-          allowsMultiple
-          onSelect={isProcessing ? undefined : onSelectFiles}
-        >
-          <Button isDisabled={isProcessing}>Add</Button>
-        </FileTrigger>
+        <AddFileMenu
+          isDisabled={isProcessing}
+          onSelectFiles={onSelectFiles}
+          onManualEntry={onManualEntry}
+        />
       </div>
     </>
   );

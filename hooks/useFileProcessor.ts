@@ -24,7 +24,7 @@ import {
 
 export interface TextFile {
   key: Key;
-  name: string;
+  name?: string;
   content: string;
 }
 
@@ -161,7 +161,6 @@ export const useFileProcessor = (
                 return textItem.getText("text/plain").then((content) => [
                   {
                     key: crypto.randomUUID(),
-                    name: "untitled.txt",
                     content,
                   },
                 ]);
@@ -170,7 +169,6 @@ export const useFileProcessor = (
                 return textItem.getText("text/plain").then((content) => [
                   {
                     key: crypto.randomUUID(),
-                    name: "untitled.txt",
                     content,
                   },
                 ]);

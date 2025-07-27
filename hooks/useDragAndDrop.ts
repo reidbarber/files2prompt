@@ -23,7 +23,9 @@ export const useDragAndDrop = (
       files
         .filter((file) => keys.has(file.key))
         .map((file) => ({
-          "text/plain": file.name,
+          "text/plain":
+            file.name ||
+            file.content.replace(/\s+/g, " ").trim().substring(0, 50),
           "application/x-gridlist-key": String(file.key),
         })),
     onReorder(e) {
