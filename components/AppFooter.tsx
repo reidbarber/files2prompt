@@ -1,5 +1,6 @@
 import React from "react";
 import { SettingsSwitch } from "@/components/SettingsSwitch";
+import { Link } from "react-aria-components";
 
 interface AppFooterProps {
   autoCopy: boolean;
@@ -20,7 +21,14 @@ export const AppFooter = React.memo(function AppFooter({
         />
       </div>
       Convert files to text prompts for ChatGPT, Claude, Gemini, etc.{" "}
-      <u>in the browser</u>.
+      <Link
+        href="https://github.com/reidbarber/files2prompt"
+        target="_blank"
+        className="underline"
+      >
+        in the browser
+      </Link>
+      .
     </div>
   );
 });
