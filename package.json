@@ -14,7 +14,7 @@
     "@vercel/analytics": "^1.2.2",
     "@zip.js/zip.js": "^2.7.68",
     "js-tiktoken": "^1.0.20",
-    "next": "15.4.4",
+    "next": "15.4.10",
     "react": "19.1.0",
     "react-aria": "^3.42.0",
     "react-aria-components": "^1.11.0",
