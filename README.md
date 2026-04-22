@@ -1,4 +1,4 @@
-# [Files2Prompt](https://files2prompt.com)
+# [Files2Prompt](https://reidbarber.github.io/files2prompt/)
 
 A web-based tool for converting files into structured prompts for AI models. Drag and drop files to combine them into markdown or XML and get the prompt copied to your clipboard automatically.
 
