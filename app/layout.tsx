@@ -7,7 +7,7 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://files2prompt.com"),
+  metadataBase: new URL("https://reidbarber.github.io/files2prompt/"),
   title: "Files2Prompt - Convert files to LLM prompts",
   description:
     "Convert files (like source code) to formatted LLM prompts (like markdown). Copy the generated prompt to your clipboard automatically.",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Files2Prompt",
     description: "Convert code or text files to prompts",
     type: "website",
-    url: "https://files2prompt.com",
+    url: "https://reidbarber.github.io/files2prompt/",
     images: [
       {
         url: "/og-image.png",
